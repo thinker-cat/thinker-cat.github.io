@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cookie clicker - thinker cat</title>
+<style>
+    body {
+        background: #1e1e24;
+        font-family: sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin: 0;
+        padding: 30px 15px;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #a0a0b0;
+        font-size: 13px;
+        margin-top: 0;
+    }
+
+    .game-wrap {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+
+    .cookie-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cookie-count {
+        font-size: 32px;
+        font-weight: bold;
+        color: #ffee00;
+        margin-bottom: 4px;
+    }
+
+    .cps-label {
+        color: #a0a0b0;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    #cookieBtn {
+        font-size: 100px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.08s ease;
+        filter: drop-shadow(0 0 20px rgba(255, 238, 0, 0.3));
+    }
+
+    #cookieBtn:active {
+        transform: scale(0.9);
+    }
+
+    .float-text {
+        position: absolute;
+        color: #ffee00;
+        font-weight: bold;
+        font-size: 18px;
+        pointer-events: none;
+        animation: floatUp 0.8s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+        0% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-60px); }
+    }
+
+    .shop {
+        background: #2a2a35;
+        border-radius: 12px;
+        padding: 20px;
+        width: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+        text-align: left;
+    }
+
+    .shop h3 {
+        margin-top: 0;
+        color: #ffee00;
+        text-align: center;
+    }
+
+    .upgrade {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #383846;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: background 0.15s ease, opacity 0.15s ease;
+        border: 1px solid transparent;
+    }
+
+    .upgrade:hover {
+        background: #45455a;
+        border-color: #4da6ff;
+    }
+
+    .upgrade.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .upgrade.disabled:hover {
+        background: #383846;
+        border-color: transparent;
+    }
+
+    .upgrade-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .upgrade-name {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .upgrade-desc {
+        font-size: 11px;
+        color: #a0a0b0;
+    }
+
+    .upgrade-cost {
+        font-size: 13px;
+        font-weight: bold;
+        color: #ffee00;
+        white-space: nowrap;
+        margin-left: 10px;
+    }
+
+    .upgrade-owned {
+        font-size: 11px;
+        color: #4da6ff;
+    }
+
+    .reset-btn {
+        margin-top: 20px;
+        padding: 8px 14px;
+        background: #ff5555;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 12px;
+    }
+</style>
+</head>
+<body>
+
+    <h1>🍪 COOKIE CLICKER</h1>
+    <p class="subtitle">made by thinker cat</p>
+
+    <div class="game-wrap">
+        <div class="cookie-panel" id="cookiePanel" style="position: relative;">
+            <div class="cookie-count" id="cookieCount">0 cookies</div>
+            <div class="cps-label" id="cpsLabel">0 per second</div>
+            <button id="cookieBtn" onclick="clickCookie(event)">🍪</button>
+            <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+        </div>
+
+        <div class="shop">
+            <h3>UPGRADES</h3>
+            <div id="upgradeList"></div>
+        </div>
+    </div>
+
+<script>
+let cookies = 0;
+let cps = 0;
+
+const upgrades = [
+    { id: 'cursor', name: '👆 Cursor', desc: 'Auto-clicks for you', baseCost: 15, cps: 0.1, owned: 0 },
+    { id: 'grandma', name: '👵 Grandma', desc: 'Bakes cookies for you', baseCost: 100, cps: 1, owned: 0 },
+    { id: 'farm', name: '🌾 Farm', desc: 'Grows cookie plants', baseCost: 500, cps: 4, owned: 0 },
+    { id: 'factory', name: '🏭 Factory', desc: 'Mass produces cookies', baseCost: 3000, cps: 12, owned: 0 },
+    { id: 'mine', name: '⛏️ Mine', desc: 'Digs up cookie dough', baseCost: 15000, cps: 40, owned: 0 },
+    { id: 'bank', name: '🏦 Bank', desc: 'Cookies generate interest', baseCost: 80000, cps: 100, owned: 0 },
+    { id: 'temple', name: '🏛️ Temple', desc: 'Ancient cookie magic', baseCost: 400000, cps: 400, owned: 0 },
+    { id: 'portal', name: '🌀 Portal', desc: 'Summons cookies from another dimension', baseCost: 2000000, cps: 1600, owned: 0 }
+];
+
+function getCost(upg) {
+    return Math.ceil(upg.baseCost * Math.pow(1.15, upg.owned));
+}
+
+function formatNum(n) {
+    if (n >= 1e12) return (n / 1e12).toFixed(2) + 'T';
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K';
+    return Math.floor(n).toString();
+}
+
+function clickCookie(e) {
+    cookies += 1;
+    spawnFloatText(e, '+1');
+    updateDisplay();
+    saveGame();
+}
+
+function spawnFloatText(e, text) {
+    const panel = document.getElementById('cookiePanel');
+    const rect = panel.getBoundingClientRect();
+    const span = document.createElement('span');
+    span.className = 'float-text';
+    span.textContent = text;
+    span.style.left = (e.clientX - rect.left) + 'px';
+    span.style.top = (e.clientY - rect.top) + 'px';
+    panel.appendChild(span);
+    setTimeout(() => span.remove(), 800);
+}
+
+function buyUpgrade(id) {
+    const upg = upgrades.find(u => u.id === id);
+    const cost = getCost(upg);
+    if (cookies >= cost) {
+        cookies -= cost;
+        upg.owned++;
+        recalcCps();
+        renderUpgrades();
+        updateDisplay();
+        saveGame();
+    }
+}
+
+function recalcCps() {
+    cps = upgrades.reduce((sum, u) => sum + (u.owned * u.cps), 0);
+}
+
+function renderUpgrades() {
+    const list = document.getElementById('upgradeList');
+    list.innerHTML = '';
+    upgrades.forEach(upg => {
+        const cost = getCost(upg);
+        const canAfford = cookies >= cost;
+        const div = document.createElement('div');
+        div.className = 'upgrade' + (canAfford ? '' : ' disabled');
+        div.onclick = () => buyUpgrade(upg.id);
+        div.innerHTML = `
+            <div class="upgrade-info">
+                <span class="upgrade-name">${upg.name}</span>
+                <span class="upgrade-desc">${upg.desc} (+${upg.cps}/s each)</span>
+                <span class="upgrade-owned">Owned: ${upg.owned}</span>
+            </div>
+            <div class="upgrade-cost">${formatNum(cost)} 🍪</div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function updateDisplay() {
+    document.getElementById('cookieCount').textContent = formatNum(cookies) + ' cookies';
+    document.getElementById('cpsLabel').textContent = formatNum(cps) + ' per second';
+
+    // Refresh affordability styling without full re-render every tick
+    document.querySelectorAll('.upgrade').forEach((div, i) => {
+        const cost = getCost(upgrades[i]);
+        if (cookies >= cost) div.classList.remove('disabled');
+        else div.classList.add('disabled');
+    });
+}
+
+function saveGame() {
+    // In-memory only — no browser storage used, since it won't reliably
+    // persist across sessions everywhere this file gets opened.
+}
+
+function loadGame() {
+    // Game starts fresh each time the page loads.
+}
+
+function resetGame() {
+    if (confirm('Reset all progress?')) {
+        cookies = 0;
+        upgrades.forEach(u => u.owned = 0);
+        recalcCps();
+        renderUpgrades();
+        updateDisplay();
+    }
+}
+
+// Game loop — adds cps every tick
+setInterval(() => {
+    if (cps > 0) {
+        cookies += cps / 10;
+        updateDisplay();
+    }
+}, 100);
+
+loadGame();
+renderUpgrades();
+updateDisplay();
+</script>
+
+</body>
+</html>

@@ -39,13 +39,17 @@
 
         /* Flexbox container to align both dropdowns neatly side-by-side */
         .controls-row {
-            display: flex;
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
             justify-content: center;
             gap: 15px;
             margin: 20px auto;
         }
         
         .custom-select {
+            display: inline-block !important;
+            visibility: visible !important;
             padding: 8px 12px;
             font-size: 14px;
             font-weight: bold;
@@ -200,10 +204,10 @@
                 <option value="theme-cyber">🎮 Cyberpunk RGB</option>
             </select>
 
-            <!-- 2. Video Dropdown Menu (Updated with your exact file paths) -->
+            <!-- 2. Video Dropdown Menu (Simplified option text and fixed filename) -->
             <select id="videoSelect" class="custom-select" onchange="changeVideo(this.value)">
-                <option value="videoforwebsite.mp4">🎬 Video 1 (Main Tutorial)</option>
-                <option value="2vidforsite.mp4">🎬 Video 2 (Second Clip)</option>
+                <option value="videoforwebsite.mp4">🎬 Video 1</option>
+                <option value="2videoforsite.mp4">🎬 Video 2</option>
             </select>
         </div>
 
@@ -227,13 +231,11 @@
 
     <!-- JAVASCRIPT LOGIC SECTION -->
     <script>
-        // Function 1: Swaps out theme colors
         function changeTheme(themeName) {
             document.body.className = '';
             document.body.classList.add(themeName);
         }
 
-        // Function 2: Swaps out video files live!
         function changeVideo(videoFileName) {
             var videoPlayer = document.getElementById('mainWebVideo');
             videoPlayer.src = videoFileName;

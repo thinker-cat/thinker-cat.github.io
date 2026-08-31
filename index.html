@@ -17,6 +17,8 @@
             display: inline-block;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            /* Allows alignment tweaks inside the card */
+            min-width: 320px; 
         }
         .my-link {
             color: #0066cc;
@@ -34,6 +36,27 @@
             max-width: 100%;
             height: auto;
         }
+        /* Pushes the content to the bottom-right of the card */
+        .bottom-right-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-top: 25px;
+        }
+        /* Spacing for your custom text */
+        .credit-text {
+            font-size: 13px;
+            color: #555555;
+            margin: 0 0 5px 0;
+            font-style: italic;
+        }
+        /* Shrunk the image down slightly more so it fits nicely in the corner */
+        .my-small-image {
+            display: block;
+            border-radius: 6px;
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
@@ -43,11 +66,14 @@
         <p>now always online!!! thanks github :D</p>
         <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>
         
-        <!-- THE ORIGINAL GIF (LEFT AS IS) -->
+        <!-- THE ORIGINAL GIF -->
         <img class="my-gif" src="animation.gif" alt="should play a gif" width="300">
 
-        <!-- YOUR NEW .PNG IMAGE (CHANGE "image" TO YOUR ACTUAL FILE NAME) -->
-        <img class="my-gif" src="thinker.png" alt="made by thinker cat" width="300">
+        <!-- NEW CONTAINER TO ALIGN CONTENT TO THE BOTTOM RIGHT -->
+        <div class="bottom-right-container">
+            <p class="credit-text">made by thinker cat</p>
+            <img class="my-small-image" src="thinker.png" alt="thinker cat image" width="100">
+        </div>
     </div>
 
 </body>

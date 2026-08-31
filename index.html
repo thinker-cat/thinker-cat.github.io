@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>look how cool</title>
     <style>
-        /* Base page transitions so switching themes looks smooth */
         body, .card, h1, .subtitle, .credit-text {
             transition: all 0.3s ease;
         }
@@ -108,6 +107,38 @@
             transition: border 0.3s ease;
         }
 
+        .clicker-section {
+            margin-top: 25px;
+        }
+
+        .clicker-btn {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 14px 28px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .clicker-btn:active {
+            transform: scale(0.92);
+        }
+
+        .click-count {
+            margin-top: 10px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .click-msg {
+            margin-top: 6px;
+            font-size: 13px;
+            min-height: 18px;
+            font-style: italic;
+        }
+
         /* THEME DEFINITIONS */
 
         body.theme-dark { background: #1e1e24; }
@@ -118,6 +149,9 @@
         body.theme-dark .credit-text { color: #9090a0; }
         body.theme-dark .custom-select { background: #383846; color: #ffffff; border: 1px solid #4e4e62; }
         body.theme-dark .my-small-image { border: none; }
+        body.theme-dark .clicker-btn { background: #4da6ff; color: #1e1e24; }
+        body.theme-dark .click-count { color: #ffffff; }
+        body.theme-dark .click-msg { color: #a0a0b0; }
 
         body.theme-orange { background: #1a0f00; }
         body.theme-orange .card { background: #ff9900; box-shadow: 0 10px 25px rgba(255, 153, 0, 0.2); }
@@ -127,6 +161,9 @@
         body.theme-orange .credit-text { color: #332200; }
         body.theme-orange .custom-select { background: #1a0f00; color: #ff9900; border: 1px solid #ff9900; }
         body.theme-orange .my-small-image { border: 2px solid #1a0f00; }
+        body.theme-orange .clicker-btn { background: #1a0f00; color: #ff9900; }
+        body.theme-orange .click-count { color: #1a0f00; }
+        body.theme-orange .click-msg { color: #332200; }
 
         body.theme-black { background: #0a0a0a; }
         body.theme-black .card { background: #121212; border: 1px solid #222222; }
@@ -136,6 +173,9 @@
         body.theme-black .credit-text { color: #666666; }
         body.theme-black .custom-select { background: #000000; color: #ffffff; border: 1px solid #333333; }
         body.theme-black .my-small-image { border: 1px solid #333333; }
+        body.theme-black .clicker-btn { background: #ffffff; color: #0a0a0a; }
+        body.theme-black .click-count { color: #ffffff; }
+        body.theme-black .click-msg { color: #888888; }
 
         body.theme-white { background: #ffffff; }
         body.theme-white .card { background: #ffffff; border: 1px solid #e0e0e0; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -145,6 +185,9 @@
         body.theme-white .credit-text { color: #888888; }
         body.theme-white .custom-select { background: #ffffff; color: #000000; border: 1px solid #cccccc; }
         body.theme-white .my-small-image { border: 1px solid #e0e0e0; }
+        body.theme-white .clicker-btn { background: #000000; color: #ffffff; }
+        body.theme-white .click-count { color: #000000; }
+        body.theme-white .click-msg { color: #666666; }
 
         body.theme-creme { background: #fdf6e2; }
         body.theme-creme .card { background: #fffdf6; border: 2px solid #f4ebd0; }
@@ -154,6 +197,9 @@
         body.theme-creme .credit-text { color: #a08060; }
         body.theme-creme .custom-select { background: #fffdf6; color: #5c4033; border: 1px solid #f4ebd0; }
         body.theme-creme .my-small-image { border: 1px solid #f4ebd0; }
+        body.theme-creme .clicker-btn { background: #b87333; color: #fffdf6; }
+        body.theme-creme .click-count { color: #5c4033; }
+        body.theme-creme .click-msg { color: #8b5a2b; }
 
         body.theme-purple { background: #0f051d; }
         body.theme-purple .card { background: #1c0b3a; border: 1px solid #a124ff; box-shadow: 0 0 15px rgba(161, 36, 255, 0.3); }
@@ -163,6 +209,9 @@
         body.theme-purple .credit-text { color: #b399ff; }
         body.theme-purple .custom-select { background: #1c0b3a; color: #dfb3ff; border: 1px solid #a124ff; }
         body.theme-purple .my-small-image { border: 1px solid #a124ff; }
+        body.theme-purple .clicker-btn { background: #a124ff; color: #ffffff; }
+        body.theme-purple .click-count { color: #ffffff; }
+        body.theme-purple .click-msg { color: #dfb3ff; }
 
         body.theme-cyber { background: #121212; }
         body.theme-cyber .card { background: #1a1a1a; border: 2px solid #00f2ff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); }
@@ -172,6 +221,9 @@
         body.theme-cyber .credit-text { color: #aaaaaa; }
         body.theme-cyber .custom-select { background: #1a1a1a; color: #00f2ff; border: 1px solid #00f2ff; }
         body.theme-cyber .my-small-image { border: 1px solid #00f2ff; }
+        body.theme-cyber .clicker-btn { background: #00f2ff; color: #121212; }
+        body.theme-cyber .click-count { color: #39ff14; }
+        body.theme-cyber .click-msg { color: #aaaaaa; }
 
     </style>
 </head>
@@ -208,6 +260,12 @@
 
         <img class="my-gif" src="animation.gif" alt="should play a gif">
 
+        <div class="clicker-section">
+            <button class="clicker-btn" id="clickerBtn" onclick="handleClick()">CLICK ME 🖱️</button>
+            <p class="click-count" id="clickCount">Clicks: 0</p>
+            <p class="click-msg" id="clickMsg"></p>
+        </div>
+
         <div class="bottom-right-container">
             <p class="credit-text">made by thinker cat</p>
             <img class="my-small-image" src="thinker.png" alt="thinker cat image">
@@ -225,6 +283,34 @@
             videoPlayer.src = videoFileName;
             videoPlayer.load();
             videoPlayer.play();
+        }
+
+        var clickCount = 0;
+
+        var milestoneMessages = {
+            10: "you clicked 10 times... okay",
+            25: "still clicking huh",
+            50: "50 clicks. impressive dedication to nothing",
+            100: "100 CLICKS. get a hobby",
+            250: "250?? bro really is bored in class",
+            500: "500 clicks. legendary status unlocked",
+            1000: "1000 clicks. thinker cat salutes you 🐱"
+        };
+
+        function handleClick() {
+            clickCount++;
+            document.getElementById('clickCount').textContent = 'Clicks: ' + clickCount;
+
+            var msgEl = document.getElementById('clickMsg');
+            if (milestoneMessages[clickCount]) {
+                msgEl.textContent = milestoneMessages[clickCount];
+            }
+
+            var btn = document.getElementById('clickerBtn');
+            btn.style.transform = 'scale(0.9)';
+            setTimeout(function () {
+                btn.style.transform = 'scale(1)';
+            }, 100);
         }
     </script>
 

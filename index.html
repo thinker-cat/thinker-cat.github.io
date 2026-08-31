@@ -9,18 +9,18 @@
             font-family: sans-serif;
             text-align: center;
             margin-top: 40px;
-            background: #1e1e24; /* Smooth dark gray background */
+            background: #1e1e24; 
         }
         .card {
-            background: #2a2a35; /* Clean matte dark purple-gray card */
-            /* Expanded padding to fit your new all-rounder sections cleanly */
+            background: #2a2a35; 
             padding: 30px 40px 100px 40px;
             display: inline-block;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             
-            /* FIXED: Kept the nice wide 440px structure so it isn't a narrow strip */
-            width: 440px; 
+            /* FORCED CARD WIDTH */
+            width: 440px !important; 
+            max-width: 90% !important; /* Keeps it responsive on small mobile screens */
             box-sizing: border-box;
             position: relative; 
         }
@@ -43,42 +43,23 @@
             color: #80bfff;
             text-decoration: underline;
         }
-        /* Video Container Setup */
+        /* STRETCHED VIDEO CONTAINER */
         .my-video {
             display: block;
             margin: 20px auto;
             border-radius: 8px;
-            width: 200px; /* Kept at your perfect 200px size */
+            width: 75% !important; /* Scaled up to cleanly fit the 440px width */
             height: auto;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
-        /* NEW: All-Rounder Badges Container */
-        .skills-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            margin: 20px auto;
-            max-width: 360px;
-        }
-        .badge {
-            background: #383846;
-            color: #e0e0e5;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            border: 1px solid #4e4e62;
-        }
+        /* STRETCHED GIF CONTAINER */
         .my-gif {
             display: block;
             margin: 20px auto 0 auto;
             border-radius: 8px;
-            width: 320px;
+            width: 100% !important; /* Forces the Among Us GIF to span across the wide card */
             height: auto;
         }
-        /* Side-by-side signature setup */
         .bottom-right-container {
             position: absolute;
             bottom: 20px;
@@ -105,7 +86,8 @@
 </head>
 <body>
 
-    <div class="card">
+    <!-- Double-locked wide card container layout -->
+    <div class="card" style="width: 440px !important;">
         <h1>look at my website</h1>
         <p class="subtitle">now always online!!! thanks github :D</p>
         <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>
@@ -115,14 +97,6 @@
             <source src="videoforwebsite.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
-
-        <!-- NEW: ALL-ROUNDER CREATOR SECTIONS -->
-        <div class="skills-grid">
-            <span class="badge">💻 Web Coding</span>
-            <span class="badge">🎬 Content Creator</span>
-            <span class="badge">🛠️ PC Builder</span>
-            <span class="badge">🎮 FPS Gamer</span>
-        </div>
 
         <!-- THE ORIGINAL AMONG US GIF -->
         <img class="my-gif" src="animation.gif" alt="should play a gif">

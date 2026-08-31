@@ -17,8 +17,8 @@
             display: inline-block;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            /* Allows alignment tweaks inside the card */
             min-width: 320px; 
+            box-sizing: border-box;
         }
         .my-link {
             color: #0066cc;
@@ -36,25 +36,25 @@
             max-width: 100%;
             height: auto;
         }
-        /* Pushes the content to the bottom-right of the card */
+        /* Aligns the wrapper content to the far right side */
         .bottom-right-container {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             margin-top: 25px;
+            width: 100%;
         }
-        /* Spacing for your custom text */
         .credit-text {
             font-size: 13px;
             color: #555555;
             margin: 0 0 5px 0;
             font-style: italic;
         }
-        /* Shrunk the image down slightly more so it fits nicely in the corner */
+        /* Strictly locks the image size so it CANNOT stretch out */
         .my-small-image {
             display: block;
             border-radius: 6px;
-            max-width: 100%;
+            width: 100px !important;  /* Forces the width to stay tiny */
             height: auto;
         }
     </style>
@@ -69,10 +69,11 @@
         <!-- THE ORIGINAL GIF -->
         <img class="my-gif" src="animation.gif" alt="should play a gif" width="300">
 
-        <!-- NEW CONTAINER TO ALIGN CONTENT TO THE BOTTOM RIGHT -->
+        <!-- THE CORNER CONTAINER -->
         <div class="bottom-right-container">
             <p class="credit-text">made by thinker cat</p>
-            <img class="my-small-image" src="thinker.png" alt="thinker cat image" width="100">
+            <!-- STAYS LOCKED AT 100PX WIDE -->
+            <img class="my-small-image" src="thinker.png" alt="thinker cat image">
         </div>
     </div>
 

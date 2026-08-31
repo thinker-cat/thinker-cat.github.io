@@ -264,6 +264,7 @@
         <div class="clicker-section">
             <button class="clicker-btn" id="clickerBtn" onclick="handleClick()">CLICK ME 🖱️</button>
             <p class="click-count" id="clickCount">Clicks: 0</p>
+            <p class="click-count" id="cpsCount">CPS: 0.0</p>
             <p class="click-msg" id="clickMsg"></p>
         </div>
 
@@ -287,6 +288,7 @@
         }
 
         var clickCount = 0;
+        var clickTimestamps = [];
 
         var milestoneMessages = {
             10: "you clicked 10 times... okay",
@@ -302,6 +304,8 @@
             clickCount++;
             document.getElementById('clickCount').textContent = 'Clicks: ' + clickCount;
 
+            clickTimestamps.push(Date.now());
+
             var msgEl = document.getElementById('clickMsg');
             if (milestoneMessages[clickCount]) {
                 msgEl.textContent = milestoneMessages[clickCount];
@@ -313,6 +317,15 @@
                 btn.style.transform = 'scale(1)';
             }, 100);
         }
+
+        // CPS LIVE UPDATE — recalculates clicks in the last 1 second
+        setInterval(function () {
+            var now = Date.now();
+            clickTimestamps = clickTimestamps.filter(function (t) {
+                return now - t <= 1000;
+            });
+            document.getElementById('cpsCount').textContent = 'CPS: ' + clickTimestamps.length.toFixed(1);
+        }, 100);
     </script>
 
 </body>

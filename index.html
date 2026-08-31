@@ -8,53 +8,77 @@
         body {
             font-family: sans-serif;
             text-align: center;
-            margin-top: 50px;
-            background: #f0f0f0;
+            margin-top: 40px;
+            background: #1e1e24; /* Smooth dark gray background */
         }
         .card {
-            background: white;
-            /* Added padding on the bottom to fit the horizontal signature cleanly */
-            padding: 30px 40px 90px 40px;
+            background: #2a2a35; /* Clean matte dark purple-gray card */
+            /* Expanded padding to fit your new all-rounder sections cleanly */
+            padding: 30px 40px 100px 40px;
             display: inline-block;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             
-            /* FIXED: Widened the card base so it doesn't look like a narrow strip */
-            width: 450px; 
+            /* FIXED: Kept the nice wide 440px structure so it isn't a narrow strip */
+            width: 440px; 
             box-sizing: border-box;
             position: relative; 
         }
+        h1 {
+            color: #ffffff;
+            margin-bottom: 5px;
+            font-size: 26px;
+        }
+        .subtitle {
+            color: #a0a0b0;
+            margin-top: 0;
+            font-size: 14px;
+        }
         .my-link {
-            color: #0066cc;
+            color: #4da6ff;
             text-decoration: none;
             font-weight: bold;
         }
         .my-link:hover {
-            color: #004499;
-            text-underline-offset: 3px;
+            color: #80bfff;
             text-decoration: underline;
         }
-        /* Custom styles for your brand new native video player */
+        /* Video Container Setup */
         .my-video {
             display: block;
-            margin: 25px auto;
+            margin: 20px auto;
             border-radius: 8px;
-            
-            /* FIXED: Set to a clean width that fits the new 450px wide card beautifully */
-            width: 260px;
+            width: 200px; /* Kept at your perfect 200px size */
             height: auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        /* NEW: All-Rounder Badges Container */
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px auto;
+            max-width: 360px;
+        }
+        .badge {
+            background: #383846;
+            color: #e0e0e5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            border: 1px solid #4e4e62;
         }
         .my-gif {
             display: block;
-            margin: 25px auto 0 auto;
+            margin: 20px auto 0 auto;
             border-radius: 8px;
-            
-            /* FIXED: Scaled up your yellow GIF slightly to balance the wider layout space */
             width: 320px;
             height: auto;
         }
-        /* Aligns the text and the image side-by-side on a single horizontal line */
+        /* Side-by-side signature setup */
         .bottom-right-container {
             position: absolute;
             bottom: 20px;
@@ -66,7 +90,7 @@
         }
         .credit-text {
             font-size: 11px;
-            color: #777777;
+            color: #9090a0;
             margin: 0;           
             font-style: italic;
             white-space: nowrap; 
@@ -74,7 +98,7 @@
         .my-small-image {
             display: block;
             border-radius: 4px;
-            width: 65px !important;  
+            width: 75px !important;  
             height: auto;
         }
     </style>
@@ -83,19 +107,27 @@
 
     <div class="card">
         <h1>look at my website</h1>
-        <p>now always online!!! thanks github :D</p>
+        <p class="subtitle">now always online!!! thanks github :D</p>
         <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>
         
-        <!-- LOCAL VIDEO PLAYER SECTION (Clean tutorial format layout) -->
+        <!-- LOCAL VIDEO PLAYER SECTION -->
         <video class="my-video" controls muted>
             <source src="videoforwebsite.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
+        <!-- NEW: ALL-ROUNDER CREATOR SECTIONS -->
+        <div class="skills-grid">
+            <span class="badge">💻 Web Coding</span>
+            <span class="badge">🎬 Content Creator</span>
+            <span class="badge">🛠️ PC Builder</span>
+            <span class="badge">🎮 FPS Gamer</span>
+        </div>
+
         <!-- THE ORIGINAL AMONG US GIF -->
         <img class="my-gif" src="animation.gif" alt="should play a gif">
 
-        <!-- PINNED TO THE VERY BOTTOM RIGHT (Now arranged horizontally) -->
+        <!-- PINNED TO THE VERY BOTTOM RIGHT -->
         <div class="bottom-right-container">
             <p class="credit-text">made by thinker cat</p>
             <img class="my-small-image" src="thinker.png" alt="thinker cat image">

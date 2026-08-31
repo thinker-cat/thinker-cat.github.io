@@ -27,10 +27,25 @@
             color: #004499;
             text-decoration: underline;
         }
-        /* This handles spacing for both your GIF and your image */
         .my-gif {
             display: block;
             margin: 20px auto 0 auto;
+            border-radius: 6px;
+            max-width: 100%;
+            height: auto;
+        }
+        /* Style for your new custom text */
+        .credit-text {
+            font-size: 14px;
+            color: #555555;
+            margin-top: 25px;
+            margin-bottom: 5px;
+            font-style: italic;
+        }
+        /* Style to make your PNG image smaller */
+        .my-small-image {
+            display: block;
+            margin: 0 auto;
             border-radius: 6px;
             max-width: 100%;
             height: auto;
@@ -47,8 +62,11 @@
         <!-- THE ORIGINAL GIF (STAYS AS IS) -->
         <img class="my-gif" src="animation.gif" alt="should play a gif" width="300">
 
-        <!-- THE NEW IMAGE (ADD THIS) -->
-        <img class="my-gif" src="thinker.png" alt="my new image" width="300">
+        <!-- YOUR NEW TEXT -->
+        <p class="credit-text">made by thinker cat</p>
+
+        <!-- YOUR SMALLER .PNG IMAGE -->
+        <img class="my-small-image" src="image.png" alt="my new png image" width="150">
     </div>
 
 </body>

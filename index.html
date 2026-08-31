@@ -13,13 +13,14 @@
         }
         .card {
             background: white;
-            /* Adjusted padding to fit the new horizontal signature cleanly */
-            padding: 30px 30px 90px 30px;
+            /* Added padding on the bottom to fit the horizontal signature cleanly */
+            padding: 30px 40px 90px 40px;
             display: inline-block;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            min-width: 320px; 
-            max-width: 680px; 
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            
+            /* FIXED: Widened the card base so it doesn't look like a narrow strip */
+            width: 450px; 
             box-sizing: border-box;
             position: relative; 
         }
@@ -30,33 +31,38 @@
         }
         .my-link:hover {
             color: #004499;
+            text-underline-offset: 3px;
             text-decoration: underline;
         }
         /* Custom styles for your brand new native video player */
         .my-video {
             display: block;
-            margin: 20px auto;
+            margin: 25px auto;
             border-radius: 8px;
-            max-width: 100%;
+            
+            /* FIXED: Set to a clean width that fits the new 450px wide card beautifully */
+            width: 260px;
             height: auto;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         .my-gif {
             display: block;
-            margin: 20px auto 0 auto;
-            border-radius: 6px;
-            max-width: 100%;
+            margin: 25px auto 0 auto;
+            border-radius: 8px;
+            
+            /* FIXED: Scaled up your yellow GIF slightly to balance the wider layout space */
+            width: 320px;
             height: auto;
         }
         /* Aligns the text and the image side-by-side on a single horizontal line */
         .bottom-right-container {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
+            bottom: 20px;
+            right: 25px;
             display: flex;
             flex-direction: row; 
             align-items: center; 
-            gap: 8px;            
+            gap: 10px;            
         }
         .credit-text {
             font-size: 11px;
@@ -68,7 +74,7 @@
         .my-small-image {
             display: block;
             border-radius: 4px;
-            width: 75px !important;  
+            width: 65px !important;  
             height: auto;
         }
     </style>
@@ -80,14 +86,14 @@
         <p>now always online!!! thanks github :D</p>
         <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>
         
-        <!-- NEW LOCAL VIDEO PLAYER SECTION (Updated to 200px wide) -->
-        <video class="my-video" width="200" controls muted>
+        <!-- LOCAL VIDEO PLAYER SECTION (Clean tutorial format layout) -->
+        <video class="my-video" controls muted>
             <source src="videoforwebsite.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
-        <!-- THE ORIGINAL GIF -->
-        <img class="my-gif" src="animation.gif" alt="should play a gif" width="300">
+        <!-- THE ORIGINAL AMONG US GIF -->
+        <img class="my-gif" src="animation.gif" alt="should play a gif">
 
         <!-- PINNED TO THE VERY BOTTOM RIGHT (Now arranged horizontally) -->
         <div class="bottom-right-container">

@@ -37,12 +37,15 @@
             font-size: 14px;
         }
 
-        /* Styling for the Theme Dropdown Select Box */
-        .theme-selector-container {
-            margin: 15px auto;
+        /* Flexbox container to align both dropdowns neatly side-by-side */
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px auto;
         }
         
-        .theme-select {
+        .custom-select {
             padding: 8px 12px;
             font-size: 14px;
             font-weight: bold;
@@ -103,17 +106,17 @@
         }
 
         /* ========================================================
-           THEME DEFINITIONS (Swapped instantly via JavaScript)
+           THEME DEFINITIONS
            ======================================================== */
 
-        /* 1. DEFAULT MATTE DARK (Grey and Charcoal Mix) */
+        /* 1. DEFAULT MATTE DARK */
         body.theme-dark { background: #1e1e24; }
         body.theme-dark .card { background: #2a2a35; }
         body.theme-dark h1 { color: #ffffff; }
         body.theme-dark .subtitle { color: #a0a0b0; }
         body.theme-dark .my-link { color: #4da6ff; }
         body.theme-dark .credit-text { color: #9090a0; }
-        body.theme-dark .theme-select { background: #383846; color: #ffffff; border: 1px solid #4e4e62; }
+        body.theme-dark .custom-select { background: #383846; color: #ffffff; border: 1px solid #4e4e62; }
         body.theme-dark .my-small-image { border: none; }
 
         /* 2. ORANGE MECHANIC Theme */
@@ -123,7 +126,7 @@
         body.theme-orange .subtitle { color: #332200; font-weight: bold; }
         body.theme-orange .my-link { color: #ffffff; background: #1a0f00; padding: 4px 10px; border-radius: 4px; }
         body.theme-orange .credit-text { color: #332200; }
-        body.theme-orange .theme-select { background: #1a0f00; color: #ff9900; border: 1px solid #ff9900; }
+        body.theme-orange .custom-select { background: #1a0f00; color: #ff9900; border: 1px solid #ff9900; }
         body.theme-orange .my-small-image { border: 2px solid #1a0f00; }
 
         /* 3. SOLID BLACKOUT Theme */
@@ -133,7 +136,7 @@
         body.theme-black .subtitle { color: #888888; }
         body.theme-black .my-link { color: #ffffff; text-decoration: underline; }
         body.theme-black .credit-text { color: #666666; }
-        body.theme-black .theme-select { background: #000000; color: #ffffff; border: 1px solid #333333; }
+        body.theme-black .custom-select { background: #000000; color: #ffffff; border: 1px solid #333333; }
         body.theme-black .my-small-image { border: 1px solid #333333; }
 
         /* 4. SOLID WHITE Theme */
@@ -143,7 +146,7 @@
         body.theme-white .subtitle { color: #666666; }
         body.theme-white .my-link { color: #000000; font-weight: 900; text-decoration: underline; }
         body.theme-white .credit-text { color: #888888; }
-        body.theme-white .theme-select { background: #ffffff; color: #000000; border: 1px solid #cccccc; }
+        body.theme-white .custom-select { background: #ffffff; color: #000000; border: 1px solid #cccccc; }
         body.theme-white .my-small-image { border: 1px solid #e0e0e0; }
 
         /* 5. VANILLA CREME Theme */
@@ -153,7 +156,7 @@
         body.theme-creme .subtitle { color: #8b5a2b; }
         body.theme-creme .my-link { color: #b87333; }
         body.theme-creme .credit-text { color: #a08060; }
-        body.theme-creme .theme-select { background: #fffdf6; color: #5c4033; border: 1px solid #f4ebd0; }
+        body.theme-creme .custom-select { background: #fffdf6; color: #5c4033; border: 1px solid #f4ebd0; }
         body.theme-creme .my-small-image { border: 1px solid #f4ebd0; }
 
         /* 6. NEON PURPLE Theme */
@@ -163,7 +166,7 @@
         body.theme-purple .subtitle { color: #dfb3ff; }
         body.theme-purple .my-link { color: #a124ff; background: #ffffff; padding: 2px 8px; border-radius: 4px; }
         body.theme-purple .credit-text { color: #b399ff; }
-        body.theme-purple .theme-select { background: #1c0b3a; color: #dfb3ff; border: 1px solid #a124ff; }
+        body.theme-purple .custom-select { background: #1c0b3a; color: #dfb3ff; border: 1px solid #a124ff; }
         body.theme-purple .my-small-image { border: 1px solid #a124ff; }
 
         /* 7. CYBERPUNK RGB GLOW */
@@ -173,22 +176,21 @@
         body.theme-cyber .subtitle { color: #39ff14; font-weight: bold; }
         body.theme-cyber .my-link { color: #00f2ff; }
         body.theme-cyber .credit-text { color: #aaaaaa; }
-        body.theme-cyber .theme-select { background: #1a1a1a; color: #00f2ff; border: 1px solid #00f2ff; }
+        body.theme-cyber .custom-select { background: #1a1a1a; color: #00f2ff; border: 1px solid #00f2ff; }
         body.theme-cyber .my-small-image { border: 1px solid #00f2ff; }
 
     </style>
 </head>
-<!-- Starts on your grey/dark option by default -->
 <body class="theme-dark">
 
     <div class="card" style="width: 650px !important;">
         <h1>look at my website</h1>
         <p class="subtitle">now always online!!! thanks github :D</p>
         
-        <!-- COMPREHENSIVE NEW THEME SELECTOR DROPDOWN -->
-        <div class="theme-selector-container">
-            <label for="themeSelect" style="display:none;">Choose Theme</label>
-            <select id="themeSelect" class="theme-select" onchange="changeTheme(this.value)">
+        <!-- THEME AND VIDEO CONTROLS ROW -->
+        <div class="controls-row">
+            <!-- 1. Theme Dropdown Menu -->
+            <select id="themeSelect" class="custom-select" onchange="changeTheme(this.value)">
                 <option value="theme-dark">⚙️ Dark Grey</option>
                 <option value="theme-black">⚫ Solid Black</option>
                 <option value="theme-white">⚪ Clean White</option>
@@ -197,12 +199,18 @@
                 <option value="theme-purple">🔮 Neon Purple</option>
                 <option value="theme-cyber">🎮 Cyberpunk RGB</option>
             </select>
+
+            <!-- 2. Video Dropdown Menu (Updated with your exact file paths) -->
+            <select id="videoSelect" class="custom-select" onchange="changeVideo(this.value)">
+                <option value="videoforwebsite.mp4">🎬 Video 1 (Main Tutorial)</option>
+                <option value="2vidforsite.mp4">🎬 Video 2 (Second Clip)</option>
+            </select>
         </div>
 
         <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>
         
         <!-- LOCAL VIDEO PLAYER SECTION -->
-        <video class="my-video" controls muted>
+        <video id="mainWebVideo" class="my-video" controls muted>
             <source src="videoforwebsite.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
@@ -217,14 +225,20 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT: Handles the live theme swapping logic -->
+    <!-- JAVASCRIPT LOGIC SECTION -->
     <script>
+        // Function 1: Swaps out theme colors
         function changeTheme(themeName) {
-            // Remove any theme classes currently attached to the body tag
             document.body.className = '';
-            
-            // Add the new selected theme class instantly
             document.body.classList.add(themeName);
+        }
+
+        // Function 2: Swaps out video files live!
+        function changeVideo(videoFileName) {
+            var videoPlayer = document.getElementById('mainWebVideo');
+            videoPlayer.src = videoFileName;
+            videoPlayer.load();
+            videoPlayer.play();
         }
     </script>
 

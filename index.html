@@ -13,21 +13,21 @@
         }
         .card {
             background: #2a2a35; 
-            padding: 30px 40px 100px 40px;
+            padding: 40px 50px 100px 50px;
             display: inline-block;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             
-            /* FORCED CARD WIDTH */
-            width: 440px !important; 
-            max-width: 90% !important; /* Keeps it responsive on small mobile screens */
+            /* FIXED: Expanded the card base width from 440px to 650px */
+            width: 650px !important; 
+            max-width: 95% !important; /* Ensures it stays clean on smaller mobile screens */
             box-sizing: border-box;
             position: relative; 
         }
         h1 {
             color: #ffffff;
             margin-bottom: 5px;
-            font-size: 26px;
+            font-size: 28px;
         }
         .subtitle {
             color: #a0a0b0;
@@ -43,31 +43,34 @@
             color: #80bfff;
             text-decoration: underline;
         }
-        /* STRETCHED VIDEO CONTAINER */
+        /* Custom styles for your video container */
         .my-video {
             display: block;
-            margin: 20px auto;
+            margin: 25px auto;
             border-radius: 8px;
-            width: 75% !important; /* Scaled up to cleanly fit the 440px width */
+            /* Scaled to sit perfectly balanced inside the wider 650px card */
+            width: 380px !important; 
             height: auto;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
-        /* STRETCHED GIF CONTAINER */
+        /* Custom styles for your main GIF container */
         .my-gif {
             display: block;
-            margin: 20px auto 0 auto;
+            margin: 25px auto 0 auto;
             border-radius: 8px;
-            width: 100% !important; /* Forces the Among Us GIF to span across the wide card */
+            /* Expanded your animation asset to spread wide across the dashboard */
+            width: 500px !important; 
             height: auto;
         }
+        /* Side-by-side signature setup */
         .bottom-right-container {
             position: absolute;
-            bottom: 20px;
-            right: 25px;
+            bottom: 25px;
+            right: 35px;
             display: flex;
             flex-direction: row; 
             align-items: center; 
-            gap: 10px;            
+            gap: 12px;            
         }
         .credit-text {
             font-size: 11px;
@@ -87,7 +90,7 @@
 <body>
 
     <!-- Double-locked wide card container layout -->
-    <div class="card" style="width: 440px !important;">
+    <div class="card" style="width: 650px !important;">
         <h1>look at my website</h1>
         <p class="subtitle">now always online!!! thanks github :D</p>
         <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>

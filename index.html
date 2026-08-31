@@ -32,6 +32,7 @@
             color: #004499;
             text-decoration: underline;
         }
+        /* Custom styles for your brand new native video player */
         .my-video {
             display: block;
             margin: 20px auto;
@@ -53,16 +54,16 @@
             bottom: 15px;
             right: 15px;
             display: flex;
-            flex-direction: row; /* Changed from column to row to align items horizontally */
-            align-items: center; /* Centers the text vertically against the image */
-            gap: 8px;            /* Adds space between the text and the image */
+            flex-direction: row; 
+            align-items: center; 
+            gap: 8px;            
         }
         .credit-text {
             font-size: 11px;
             color: #777777;
-            margin: 0;           /* Removed bottom margin so it lines up straight */
+            margin: 0;           
             font-style: italic;
-            white-space: nowrap; /* Prevents the text from breaking into two lines */
+            white-space: nowrap; 
         }
         .my-small-image {
             display: block;
@@ -79,8 +80,8 @@
         <p>now always online!!! thanks github :D</p>
         <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>
         
-        <!-- NEW LOCAL VIDEO PLAYER SECTION -->
-        <video class="my-video" width="190" controls muted>
+        <!-- NEW LOCAL VIDEO PLAYER SECTION (Updated to 200px wide) -->
+        <video class="my-video" width="200" controls muted>
             <source src="videoforwebsite.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>

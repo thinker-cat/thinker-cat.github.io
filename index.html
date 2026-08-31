@@ -13,12 +13,15 @@
         }
         .card {
             background: white;
-            padding: 30px;
+            /* Added padding on the bottom to make room for your corner image */
+            padding: 30px 30px 110px 30px;
             display: inline-block;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             min-width: 320px; 
             box-sizing: border-box;
+            /* This lets us lock elements inside to the card's edges */
+            position: relative; 
         }
         .my-link {
             color: #0066cc;
@@ -36,25 +39,25 @@
             max-width: 100%;
             height: auto;
         }
-        /* Aligns the wrapper content to the far right side */
+        /* Forces the container into the literal bottom-right corner of the white card */
         .bottom-right-container {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            margin-top: 25px;
-            width: 100%;
         }
         .credit-text {
-            font-size: 13px;
-            color: #555555;
-            margin: 0 0 5px 0;
+            font-size: 11px;
+            color: #777777;
+            margin: 0 0 4px 0;
             font-style: italic;
         }
-        /* Strictly locks the image size so it CANNOT stretch out */
         .my-small-image {
             display: block;
-            border-radius: 6px;
-            width: 100px !important;  /* Forces the width to stay tiny */
+            border-radius: 4px;
+            width: 75px !important;  /* Made it slightly smaller to look clean in the very corner */
             height: auto;
         }
     </style>
@@ -69,10 +72,9 @@
         <!-- THE ORIGINAL GIF -->
         <img class="my-gif" src="animation.gif" alt="should play a gif" width="300">
 
-        <!-- THE CORNER CONTAINER -->
+        <!-- PINNED TO THE VERY BOTTOM RIGHT -->
         <div class="bottom-right-container">
             <p class="credit-text">made by thinker cat</p>
-            <!-- STAYS LOCKED AT 100PX WIDE -->
             <img class="my-small-image" src="thinker.png" alt="thinker cat image">
         </div>
     </div>

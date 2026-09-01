@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>look how cool</title>
+
+    <!-- 📊 GOOGLE ANALYTICS 4 TRACKING CODE -->
+    <script async src="https://googletagmanager.com"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
     <style>
         /* Base page transitions so switching themes looks smooth */
         body, .card, h1, .subtitle, .credit-text {
@@ -202,51 +213,15 @@
                 <option value="theme-orange">🍊 Bright Orange</option>
                 <option value="theme-creme">🍦 Vanilla Creme</option>
                 <option value="theme-purple">🔮 Neon Purple</option>
-                <option value="theme-cyber">🎮 Cyberpunk RGB</option>
-            </select>
-
-            <!-- 2. Video Dropdown Menu -->
-            <select id="videoSelect" class="custom-select" onchange="changeVideo(this.value)">
-                <option value="videoforwebsite.mp4">🎬 Video 1</option>
-                <option value="2videoforsite.mp4">🎬 Video 2</option>
-                <option value="3videoforsite.mp4">🎬 Video 3</option>
+                <option value="theme-cyber">🌐 Cyberpunk</option>
             </select>
         </div>
-
-        <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>
-        <p><a class="my-link" href="https://thinker-cat.github.io/sites/tetris.html" target="_blank">🎮 Play Tetris</a></p>
-        <p><a class="my-link" href="https://thinker-cat.github.io/sites/cookieclicker.html" target="_blank">🍪 Play Cookie Clicker</a></p>
-        
-        <!-- LOCAL VIDEO PLAYER SECTION -->
-        <video id="mainWebVideo" class="my-video" controls muted>
-            <source src="videoforwebsite.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-
-        <!-- THE ORIGINAL AMONG US GIF -->
-        <img class="my-gif" src="animation.gif" alt="should play a gif">
-
-        <!-- PINNED TO THE VERY BOTTOM RIGHT -->
-        <a class="bottom-right-container" href="https://thinker-cat.github.io/sites/" style="text-decoration: none;">
-            <p class="credit-text">made by thinker cat</p>
-            <img class="my-small-image" src="thinker.png" alt="thinker cat image">
-        </a>
     </div>
 
-    <!-- JAVASCRIPT LOGIC SECTION -->
     <script>
         function changeTheme(themeName) {
-            document.body.className = '';
-            document.body.classList.add(themeName);
-        }
-
-        function changeVideo(videoFileName) {
-            var videoPlayer = document.getElementById('mainWebVideo');
-            videoPlayer.src = videoFileName;
-            videoPlayer.load();
-            videoPlayer.play();
+            document.body.className = themeName;
         }
     </script>
-
 </body>
 </html>

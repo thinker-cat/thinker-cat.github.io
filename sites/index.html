@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>thinker cat's sites</title>
+<style>
+    body {
+        background: #1e1e24;
+        font-family: sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin: 0;
+        padding: 60px 20px;
+    }
+
+    h1 {
+        font-size: 32px;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #a0a0b0;
+        font-size: 14px;
+        margin-top: 0;
+        margin-bottom: 40px;
+    }
+
+    .site-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .site-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #2a2a35;
+        border: 1px solid #383846;
+        border-radius: 12px;
+        padding: 18px 22px;
+        text-decoration: none;
+        color: #ffffff;
+        text-align: left;
+        transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .site-card:hover {
+        transform: translateY(-2px);
+        border-color: #4da6ff;
+        box-shadow: 0 6px 18px rgba(77, 166, 255, 0.2);
+    }
+
+    .site-emoji {
+        font-size: 30px;
+    }
+
+    .site-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .site-name {
+        font-weight: bold;
+        font-size: 17px;
+    }
+
+    .site-desc {
+        font-size: 12px;
+        color: #a0a0b0;
+        margin-top: 2px;
+    }
+
+    .footer-credit {
+        margin-top: 50px;
+        font-size: 12px;
+        color: #666677;
+        font-style: italic;
+    }
+</style>
+</head>
+<body>
+
+    <h1>🐱 thinker cat's sites</h1>
+    <p class="subtitle">pick your poison</p>
+
+    <div class="site-grid">
+        <a class="site-card" href="https://thinker-cat.github.io">
+            <span class="site-emoji">🖥️</span>
+            <span class="site-info">
+                <span class="site-name">Main Site</span>
+                <span class="site-desc">themes, videos, gif, and more</span>
+            </span>
+        </a>
+
+        <a class="site-card" href="tetris.html">
+            <span class="site-emoji">🧱</span>
+            <span class="site-info">
+                <span class="site-name">Tetris</span>
+                <span class="site-desc">classic block-stacking game</span>
+            </span>
+        </a>
+
+        <a class="site-card" href="cookieclicker.html">
+            <span class="site-emoji">🍪</span>
+            <span class="site-info">
+                <span class="site-name">Cookie Clicker</span>
+                <span class="site-desc">click cookies, buy upgrades, get carried away</span>
+            </span>
+        </a>
+    </div>
+
+    <p class="footer-credit">made by thinker cat</p>
+
+</body>
+</html>

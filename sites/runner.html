@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>runner - thinker cat</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RWVD8FSGK1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RWVD8FSGK1');
+</script>
+
+<style>
+    body {
+        background: #1e1e24;
+        font-family: sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #a0a0b0;
+        font-size: 13px;
+        margin-top: 0;
+    }
+
+    .game-wrap {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    canvas {
+        background: linear-gradient(#2a2a45 0%, #1a1a2a 100%);
+        border: 3px solid #a124ff;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(161, 36, 255, 0.35);
+        touch-action: manipulation;
+    }
+
+    .stat-row {
+        display: flex;
+        gap: 30px;
+        margin-top: 15px;
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        color: #a0a0b0;
+        font-weight: normal;
+        font-size: 12px;
+        display: block;
+    }
+
+    .stat-value {
+        color: #a124ff;
+    }
+
+    #restartBtn {
+        margin-top: 15px;
+        padding: 10px 20px;
+        background: #a124ff;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        display: none;
+        font-size: 14px;
+    }
+
+    #gameOverMsg {
+        color: #ff5555;
+        font-weight: bold;
+        display: none;
+        margin-top: 12px;
+        font-size: 16px;
+    }
+
+    .controls {
+        margin-top: 14px;
+        font-size: 12px;
+        color: #a0a0b0;
+    }
+</style>
+</head>
+<body>
+
+    <h1>🐱 RUNNER</h1>
+    <p class="subtitle">made by thinker cat</p>
+
+    <div class="game-wrap">
+        <canvas id="board" width="500" height="260"></canvas>
+
+        <div class="stat-row">
+            <div>
+                <span class="stat-label">SCORE</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+            <div>
+                <span class="stat-label">BEST</span>
+                <span class="stat-value" id="bestScore">0</span>
+            </div>
+        </div>
+
+        <p id="gameOverMsg">GAME OVER</p>
+        <button id="restartBtn" onclick="restartGame()">Restart</button>
+
+        <div class="controls">
+            Space / Up Arrow / Tap to jump
+        </div>
+    </div>
+
+<script>
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+const GROUND_Y = 210;
+const GRAVITY = 0.9;
+const JUMP_FORCE = -14;
+
+let cat, obstacles, score, best, speed, gameOver, spawnTimer, frame, animFrame, started;
+
+function loadBest() {
+    try {
+        const saved = localStorage.getItem('thinkerCatRunnerBest');
+        return saved ? parseInt(saved, 10) : 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+function saveBest(val) {
+    try {
+        localStorage.setItem('thinkerCatRunnerBest', val.toString());
+    } catch (e) {
+        // storage unavailable, game still works
+    }
+}
+
+function restartGame() {
+    cat = { x: 60, y: GROUND_Y - 30, w: 30, h: 30, vy: 0, jumping: false };
+    obstacles = [];
+    score = 0;
+    speed = 5;
+    frame = 0;
+    spawnTimer = 60;
+    gameOver = false;
+    started = true;
+    document.getElementById('gameOverMsg').style.display = 'none';
+    document.getElementById('restartBtn').style.display = 'none';
+    updateStats();
+    if (animFrame) cancelAnimationFrame(animFrame);
+    animFrame = requestAnimationFrame(loop);
+}
+
+function updateStats() {
+    document.getElementById('score').textContent = Math.floor(score);
+    document.getElementById('bestScore').textContent = best;
+}
+
+function jump() {
+    if (!started) { restartGame(); return; }
+    if (gameOver) { restartGame(); return; }
+    if (!cat.jumping) {
+        cat.vy = JUMP_FORCE;
+        cat.jumping = true;
+    }
+}
+
+function spawnObstacle() {
+    const height = 25 + Math.random() * 25;
+    obstacles.push({ x: canvas.width, y: GROUND_Y - height, w: 20, h: height });
+}
+
+function endGame() {
+    gameOver = true;
+    cancelAnimationFrame(animFrame);
+    if (score > best) {
+        best = Math.floor(score);
+        saveBest(best);
+    }
+    updateStats();
+    document.getElementById('gameOverMsg').style.display = 'block';
+    document.getElementById('restartBtn').style.display = 'inline-block';
+}
+
+function drawCat() {
+    ctx.fillStyle = '#ffee00';
+    ctx.fillRect(cat.x, cat.y, cat.w, cat.h);
+    // little ears
+    ctx.beginPath();
+    ctx.moveTo(cat.x + 4, cat.y);
+    ctx.lineTo(cat.x + 9, cat.y - 8);
+    ctx.lineTo(cat.x + 13, cat.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cat.x + cat.w - 13, cat.y);
+    ctx.lineTo(cat.x + cat.w - 9, cat.y - 8);
+    ctx.lineTo(cat.x + cat.w - 4, cat.y);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // ground line
+    ctx.strokeStyle = '#4d4d66';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y);
+    ctx.lineTo(canvas.width, GROUND_Y);
+    ctx.stroke();
+
+    drawCat();
+
+    ctx.fillStyle = '#ff5555';
+    obstacles.forEach(o => {
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+    });
+
+    if (!started) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Press Space / Tap to Start', canvas.width / 2, canvas.height / 2);
+    }
+}
+
+function loop() {
+    if (gameOver) return;
+
+    if (started) {
+        frame++;
+        score += 0.15;
+        speed = 5 + Math.min(score / 100, 8);
+
+        cat.vy += GRAVITY;
+        cat.y += cat.vy;
+        if (cat.y > GROUND_Y - cat.h) {
+            cat.y = GROUND_Y - cat.h;
+            cat.vy = 0;
+            cat.jumping = false;
+        }
+
+        spawnTimer--;
+        if (spawnTimer <= 0) {
+            spawnObstacle();
+            spawnTimer = 70 - Math.min(Math.floor(speed * 3), 40) + Math.random() * 20;
+        }
+
+        obstacles.forEach(o => o.x -= speed);
+        obstacles = obstacles.filter(o => o.x + o.w > 0);
+
+        for (const o of obstacles) {
+            if (
+                cat.x < o.x + o.w &&
+                cat.x + cat.w > o.x &&
+                cat.y < o.y + o.h &&
+                cat.y + cat.h > o.y
+            ) {
+                endGame();
+                return;
+            }
+        }
+
+        updateStats();
+    }
+
+    draw();
+    animFrame = requestAnimationFrame(loop);
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        jump();
+    }
+});
+
+canvas.addEventListener('mousedown', jump);
+canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    jump();
+});
+
+best = loadBest();
+started = false;
+gameOver = false;
+cat = { x: 60, y: GROUND_Y - 30, w: 30, h: 30, vy: 0, jumping: false };
+obstacles = [];
+score = 0;
+updateStats();
+draw();
+</script>
+
+</body>
+</html>

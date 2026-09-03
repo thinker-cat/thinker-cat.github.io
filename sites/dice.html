@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dice roller - thinker cat</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RWVD8FSGK1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RWVD8FSGK1');
+</script>
+
+<style>
+    body {
+        background: #1e1e24;
+        font-family: sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin: 0;
+        padding: 40px 15px;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #a0a0b0;
+        font-size: 13px;
+        margin-top: 0;
+        margin-bottom: 30px;
+    }
+
+    .dice-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .dice-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+        min-height: 90px;
+    }
+
+    .die {
+        width: 80px;
+        height: 80px;
+        background: #ffffff;
+        border-radius: 14px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        padding: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+        transition: transform 0.15s ease;
+    }
+
+    .die.rolling {
+        animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-8deg); }
+        75% { transform: rotate(8deg); }
+    }
+
+    .pip {
+        width: 12px;
+        height: 12px;
+        background: #1e1e24;
+        border-radius: 50%;
+        align-self: center;
+        justify-self: center;
+        opacity: 0;
+    }
+
+    .controls {
+        background: #2a2a35;
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .control-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+    }
+
+    input[type="number"] {
+        width: 50px;
+        padding: 6px;
+        border-radius: 6px;
+        border: 1px solid #383846;
+        background: #383846;
+        color: #ffffff;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    #rollBtn {
+        padding: 12px 28px;
+        background: #4da6ff;
+        color: #1e1e24;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .total {
+        font-size: 22px;
+        font-weight: bold;
+        color: #ffee00;
+    }
+
+    .history {
+        max-width: 400px;
+        font-size: 12px;
+        color: #a0a0b0;
+        min-height: 20px;
+    }
+</style>
+</head>
+<body>
+
+    <h1>🎲 DICE ROLLER</h1>
+    <p class="subtitle">made by thinker cat</p>
+
+    <div class="dice-wrap">
+        <div class="dice-row" id="diceRow"></div>
+
+        <div class="total" id="total"></div>
+
+        <div class="controls">
+            <div class="control-row">
+                <label for="diceCount">Number of dice:</label>
+                <input type="number" id="diceCount" min="1" max="10" value="2">
+            </div>
+            <button id="rollBtn" onclick="rollDice()">Roll!</button>
+        </div>
+
+        <div class="history" id="history"></div>
+    </div>
+
+<script>
+const diceRow = document.getElementById('diceRow');
+const totalEl = document.getElementById('total');
+const historyEl = document.getElementById('history');
+const diceCountInput = document.getElementById('diceCount');
+let rollHistory = [];
+
+const PIP_LAYOUTS = {
+    1: [4],
+    2: [0, 8],
+    3: [0, 4, 8],
+    4: [0, 2, 6, 8],
+    5: [0, 2, 4, 6, 8],
+    6: [0, 2, 3, 5, 6, 8]
+};
+
+function createDie(value) {
+    const die = document.createElement('div');
+    die.className = 'die';
+    for (let i = 0; i < 9; i++) {
+        const pip = document.createElement('div');
+        pip.className = 'pip';
+        if (PIP_LAYOUTS[value].includes(i)) pip.style.opacity = '1';
+        die.appendChild(pip);
+    }
+    return die;
+}
+
+function rollDice() {
+    let count = parseInt(diceCountInput.value, 10);
+    if (isNaN(count) || count < 1) count = 1;
+    if (count > 10) count = 10;
+    diceCountInput.value = count;
+
+    diceRow.innerHTML = '';
+    const values = [];
+
+    for (let i = 0; i < count; i++) {
+        const value = Math.floor(Math.random() * 6) + 1;
+        values.push(value);
+        const die = createDie(value);
+        die.classList.add('rolling');
+        diceRow.appendChild(die);
+    }
+
+    const sum = values.reduce((a, b) => a + b, 0);
+    totalEl.textContent = count > 1 ? `Total: ${sum}` : `Rolled: ${sum}`;
+
+    rollHistory.unshift(`[${values.join(', ')}] = ${sum}`);
+    rollHistory = rollHistory.slice(0, 5);
+    historyEl.textContent = rollHistory.join('  •  ');
+}
+
+rollDice();
+</script>
+
+</body>
+</html>

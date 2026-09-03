@@ -120,6 +120,22 @@
             transition: border 0.3s ease;
         }
 
+        .panic-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: #ff3333;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+        }
+
         /* ========================================================
            THEME DEFINITIONS
            ======================================================== */
@@ -198,6 +214,8 @@
 </head>
 <body class="theme-dark">
 
+    <button class="panic-btn" onclick="location.replace('https://www.google.com')" title="Emergency exit">🚨 Exit</button>
+
     <div class="card" style="width: 650px !important;">
         <h1>look at my website</h1>
         <p class="subtitle">now always online!!! thanks github :D</p>
@@ -230,6 +248,7 @@
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/runner.html" target="_blank">🐱 Play Runner</a></p>
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/notepad.html" target="_blank">📝 Open Notepad</a></p>
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/paint.html" target="_blank">🎨 Open Paint</a></p>
+        <p><a class="my-link" href="https://thinker-cat.github.io/sites/dice.html" target="_blank">🎲 Roll Dice</a></p>
         
         <!-- LOCAL VIDEO PLAYER SECTION -->
         <video id="mainWebVideo" class="my-video" controls muted>
@@ -260,6 +279,13 @@
             videoPlayer.load();
             videoPlayer.play();
         }
+
+        // Emergency exit — press Esc to instantly jump to Google
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                location.replace('https://www.google.com');
+            }
+        });
     </script>
 
 </body>

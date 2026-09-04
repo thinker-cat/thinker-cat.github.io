@@ -107,6 +107,17 @@
         cursor: pointer;
         display: none;
     }
+
+    .source-note {
+        margin-top: 30px;
+        font-size: 11px;
+        color: #666677;
+    }
+
+    .loading {
+        color: #a0a0b0;
+        font-size: 14px;
+    }
 </style>
 </head>
 <body>
@@ -128,9 +139,10 @@
     </div>
 
     <button id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+    <p class="source-note" id="sourceNote"></p>
 
 <script>
-const QUESTIONS = [
+const FALLBACK_QUESTIONS = [
     ["Have unlimited pizza for life", "Have unlimited tacos for life"],
     ["Be able to fly", "Be invisible"],
     ["Never use your phone again", "Never watch TV/movies again"],
@@ -153,34 +165,105 @@ const QUESTIONS = [
     ["Never get sick", "Never get tired"]
 ];
 
+let pool = [];
+let seenTexts = new Set();
+let afterToken = null;
+let noMoreReddit = false;
 let currentQuestion = [];
-let usedIndices = [];
 let picked = false;
+let questionNumber = 0;
+let usingReddit = false;
 
-function getPercents() {
-    const a = 30 + Math.floor(Math.random() * 41);
-    return [a, 100 - a];
+function parseRedditTitle(title) {
+    const cleaned = title.replace(/^(would you rather|wyr)\s*/i, '').replace(/\?+$/, '').trim();
+    const parts = cleaned.split(/\bor\b/i);
+    if (parts.length !== 2) return null;
+    const a = parts[0].trim();
+    const b = parts[1].trim();
+    if (a.length < 3 || b.length < 3 || a.length > 90 || b.length > 90) return null;
+    return [a, b];
+}
+
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+async function fetchMoreFromReddit() {
+    if (noMoreReddit) return;
+    try {
+        const afterParam = afterToken ? `&after=${afterToken}` : '';
+        const res = await fetch(`https://www.reddit.com/r/WouldYouRather/hot.json?limit=50${afterParam}`);
+        if (!res.ok) throw new Error('Reddit request failed');
+        const data = await res.json();
+        const posts = data.data.children;
+        afterToken = data.data.after;
+        if (!afterToken) noMoreReddit = true;
+
+        let added = 0;
+        posts.forEach(p => {
+            const parsed = parseRedditTitle(p.data.title);
+            if (parsed) {
+                const key = parsed[0] + '|' + parsed[1];
+                if (!seenTexts.has(key)) {
+                    seenTexts.add(key);
+                    pool.push(parsed);
+                    added++;
+                }
+            }
+        });
+
+        if (added > 0) {
+            usingReddit = true;
+            pool = shuffle(pool);
+        }
+    } catch (e) {
+        noMoreReddit = true;
+    }
+}
+
+function refillFromFallbackIfNeeded() {
+    if (pool.length === 0) {
+        // Loop the fallback list indefinitely so the game never stalls
+        pool = shuffle(FALLBACK_QUESTIONS.slice());
+        usingReddit = false;
+    }
+}
+
+function updateSourceNote() {
+    document.getElementById('sourceNote').textContent =
+        usingReddit ? 'Questions pulled from r/WouldYouRather' : 'Showing built-in questions';
 }
 
 function loadQuestion() {
-    if (usedIndices.length === QUESTIONS.length) usedIndices = [];
+    if (pool.length < 8) {
+        fetchMoreFromReddit().then(() => {
+            if (pool.length === 0) refillFromFallbackIfNeeded();
+            updateSourceNote();
+        });
+    }
+    refillFromFallbackIfNeeded();
 
-    let idx;
-    do {
-        idx = Math.floor(Math.random() * QUESTIONS.length);
-    } while (usedIndices.includes(idx));
-    usedIndices.push(idx);
+    currentQuestion = pool.shift();
+    questionNumber++;
 
-    currentQuestion = QUESTIONS[idx];
     document.getElementById('textA').textContent = currentQuestion[0];
     document.getElementById('textB').textContent = currentQuestion[1];
-    document.getElementById('questionCount').textContent =
-        `Question ${usedIndices.length} of ${QUESTIONS.length}`;
+    document.getElementById('questionCount').textContent = `Question ${questionNumber}`;
+    updateSourceNote();
 
     document.getElementById('optionA').classList.remove('picked', 'revealed');
     document.getElementById('optionB').classList.remove('picked', 'revealed');
     document.getElementById('nextBtn').style.display = 'none';
     picked = false;
+}
+
+function getPercents() {
+    const a = 30 + Math.floor(Math.random() * 41);
+    return [a, 100 - a];
 }
 
 function pick(choice) {
@@ -202,7 +285,14 @@ function nextQuestion() {
     loadQuestion();
 }
 
-loadQuestion();
+async function init() {
+    document.getElementById('questionCount').textContent = 'Loading questions...';
+    await fetchMoreFromReddit();
+    refillFromFallbackIfNeeded();
+    loadQuestion();
+}
+
+init();
 </script>
 
 </body>

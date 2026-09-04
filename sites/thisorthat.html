@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>this or that - thinker cat</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RWVD8FSGK1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RWVD8FSGK1');
+</script>
+
+<style>
+    body {
+        background: #1e1e24;
+        font-family: sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin: 0;
+        padding: 40px 15px;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #a0a0b0;
+        font-size: 13px;
+        margin-top: 0;
+        margin-bottom: 30px;
+    }
+
+    .question-count {
+        color: #a0a0b0;
+        font-size: 12px;
+        margin-bottom: 20px;
+    }
+
+    .choices {
+        display: flex;
+        gap: 16px;
+        max-width: 600px;
+        margin: 0 auto;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .choice-card {
+        flex: 1;
+        min-width: 220px;
+        background: #2a2a35;
+        border: 2px solid #383846;
+        border-radius: 14px;
+        padding: 30px 20px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .choice-card:hover {
+        transform: translateY(-3px);
+        border-color: #4da6ff;
+    }
+
+    .choice-card.picked {
+        border-color: #39ff14;
+        background: #253a25;
+    }
+
+    .choice-card .percent {
+        display: none;
+        font-size: 13px;
+        font-weight: normal;
+        color: #a0a0b0;
+        margin-top: 10px;
+    }
+
+    .choice-card.revealed .percent {
+        display: block;
+    }
+
+    .or-divider {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        color: #a0a0b0;
+        font-size: 14px;
+    }
+
+    #nextBtn {
+        margin-top: 26px;
+        padding: 12px 26px;
+        background: #4da6ff;
+        color: #1e1e24;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+    <h1>🤔 THIS OR THAT</h1>
+    <p class="subtitle">made by thinker cat</p>
+    <p class="question-count" id="questionCount"></p>
+
+    <div class="choices">
+        <div class="choice-card" id="optionA" onclick="pick('A')">
+            <div id="textA"></div>
+            <div class="percent" id="percentA"></div>
+        </div>
+        <div class="or-divider">OR</div>
+        <div class="choice-card" id="optionB" onclick="pick('B')">
+            <div id="textB"></div>
+            <div class="percent" id="percentB"></div>
+        </div>
+    </div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+
+<script>
+const QUESTIONS = [
+    ["Have unlimited pizza for life", "Have unlimited tacos for life"],
+    ["Be able to fly", "Be invisible"],
+    ["Never use your phone again", "Never watch TV/movies again"],
+    ["Always be 10 minutes late", "Always be 20 minutes early"],
+    ["Have super strength", "Have super speed"],
+    ["Live without music", "Live without games"],
+    ["Be the funniest person you know", "Be the smartest person you know"],
+    ["Have the power to freeze time", "Have the power to read minds"],
+    ["Always have to sing instead of talk", "Always have to dance everywhere you walk"],
+    ["Never eat sweets again", "Never eat fast food again"],
+    ["Be able to talk to animals", "Be able to speak every human language"],
+    ["Have a pet dragon", "Have a pet unicorn"],
+    ["Live in space", "Live underwater"],
+    ["Always win but never be challenged", "Always lose but always be challenged"],
+    ["Have no homework ever", "Have no chores ever"],
+    ["Be famous but broke", "Be rich but unknown"],
+    ["Only be able to whisper", "Only be able to shout"],
+    ["Have a time machine", "Have a teleporter"],
+    ["Be the best at video games", "Be the best at sports"],
+    ["Never get sick", "Never get tired"]
+];
+
+let currentQuestion = [];
+let usedIndices = [];
+let picked = false;
+
+function getPercents() {
+    const a = 30 + Math.floor(Math.random() * 41);
+    return [a, 100 - a];
+}
+
+function loadQuestion() {
+    if (usedIndices.length === QUESTIONS.length) usedIndices = [];
+
+    let idx;
+    do {
+        idx = Math.floor(Math.random() * QUESTIONS.length);
+    } while (usedIndices.includes(idx));
+    usedIndices.push(idx);
+
+    currentQuestion = QUESTIONS[idx];
+    document.getElementById('textA').textContent = currentQuestion[0];
+    document.getElementById('textB').textContent = currentQuestion[1];
+    document.getElementById('questionCount').textContent =
+        `Question ${usedIndices.length} of ${QUESTIONS.length}`;
+
+    document.getElementById('optionA').classList.remove('picked', 'revealed');
+    document.getElementById('optionB').classList.remove('picked', 'revealed');
+    document.getElementById('nextBtn').style.display = 'none';
+    picked = false;
+}
+
+function pick(choice) {
+    if (picked) return;
+    picked = true;
+
+    const [percentA, percentB] = getPercents();
+    document.getElementById('percentA').textContent = percentA + '% picked this';
+    document.getElementById('percentB').textContent = percentB + '% picked this';
+
+    document.getElementById('optionA').classList.add('revealed');
+    document.getElementById('optionB').classList.add('revealed');
+    document.getElementById('option' + choice).classList.add('picked');
+
+    document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+    loadQuestion();
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>

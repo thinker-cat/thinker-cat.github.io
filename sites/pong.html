@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pong - thinker cat</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RWVD8FSGK1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RWVD8FSGK1');
+</script>
+
+<style>
+    body {
+        background: #1e1e24;
+        font-family: sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin-top: 25px;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #a0a0b0;
+        font-size: 13px;
+        margin-top: 0;
+    }
+
+    .mode-row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 16px 0;
+    }
+
+    .mode-btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: 2px solid #383846;
+        background: #2a2a35;
+        color: #ffffff;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .mode-btn.active {
+        border-color: #4da6ff;
+        background: #383858;
+    }
+
+    .game-wrap {
+        display: inline-block;
+        position: relative;
+    }
+
+    canvas {
+        background: #121218;
+        border: 3px solid #4da6ff;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(77, 166, 255, 0.3);
+    }
+
+    .score-row {
+        display: flex;
+        justify-content: space-between;
+        width: 600px;
+        max-width: 100%;
+        margin: 10px auto;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .controls {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #a0a0b0;
+    }
+
+    #restartBtn {
+        margin-top: 15px;
+        padding: 8px 18px;
+        background: #4da6ff;
+        color: #1e1e24;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        display: none;
+    }
+
+    #winMsg {
+        font-size: 20px;
+        font-weight: bold;
+        color: #39ff14;
+        display: none;
+        margin-top: 10px;
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: bold;
+        color: #ffffff;
+        pointer-events: none;
+    }
+</style>
+</head>
+<body>
+
+    <h1>🏓 PONG</h1>
+    <p class="subtitle">made by thinker cat</p>
+
+    <div class="mode-row">
+        <button class="mode-btn active" id="cpuModeBtn" onclick="setMode('cpu')">1 Player (vs CPU)</button>
+        <button class="mode-btn" id="pvpModeBtn" onclick="setMode('pvp')">2 Player</button>
+    </div>
+
+    <div class="score-row">
+        <span id="scoreLeft">0</span>
+        <span id="scoreRight">0</span>
+    </div>
+
+    <div class="game-wrap">
+        <canvas id="board" width="600" height="360"></canvas>
+        <div class="overlay" id="overlay">Press Space to Start</div>
+    </div>
+
+    <p id="winMsg"></p>
+    <button id="restartBtn" onclick="startGame()">Play Again</button>
+
+    <p class="controls" id="controlsText">
+        Left paddle: W / S &nbsp;&nbsp;|&nbsp;&nbsp; Right paddle: computer &nbsp;&nbsp;|&nbsp;&nbsp; Space to start/pause
+    </p>
+
+<script>
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+
+const PADDLE_W = 10;
+const PADDLE_H = 70;
+const BALL_SIZE = 10;
+const WIN_SCORE = 7;
+
+let mode = 'cpu';
+let leftY, rightY, ballX, ballY, ballVX, ballVY;
+let scoreLeft, scoreRight;
+let keys = {};
+let running = false;
+let gameOver = false;
+let animFrame;
+
+function setMode(newMode) {
+    mode = newMode;
+    document.getElementById('cpuModeBtn').classList.toggle('active', mode === 'cpu');
+    document.getElementById('pvpModeBtn').classList.toggle('active', mode === 'pvp');
+    document.getElementById('controlsText').textContent =
+        mode === 'cpu'
+            ? 'Your paddle: W / S or Arrow Up / Down   |   Right paddle: computer   |   Space to start/pause'
+            : 'Left paddle: W / S   |   Right paddle: Arrow Up / Down   |   Space to start/pause';
+    resetPositions();
+    draw();
+}
+
+function resetPositions() {
+    leftY = canvas.height / 2 - PADDLE_H / 2;
+    rightY = canvas.height / 2 - PADDLE_H / 2;
+    ballX = canvas.width / 2;
+    ballY = canvas.height / 2;
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    ballVX = 5 * dir;
+    ballVY = (Math.random() * 4 - 2);
+}
+
+function startGame() {
+    scoreLeft = 0;
+    scoreRight = 0;
+    gameOver = false;
+    running = false;
+    document.getElementById('scoreLeft').textContent = scoreLeft;
+    document.getElementById('scoreRight').textContent = scoreRight;
+    document.getElementById('winMsg').style.display = 'none';
+    document.getElementById('restartBtn').style.display = 'none';
+    document.getElementById('overlay').textContent = 'Press Space to Start';
+    document.getElementById('overlay').style.display = 'flex';
+    resetPositions();
+    if (animFrame) cancelAnimationFrame(animFrame);
+    draw();
+    animFrame = requestAnimationFrame(loop);
+}
+
+function endRound(scorer) {
+    if (scorer === 'left') scoreLeft++; else scoreRight++;
+    document.getElementById('scoreLeft').textContent = scoreLeft;
+    document.getElementById('scoreRight').textContent = scoreRight;
+
+    if (scoreLeft >= WIN_SCORE || scoreRight >= WIN_SCORE) {
+        gameOver = true;
+        running = false;
+        const winner = scoreLeft > scoreRight ? 'Left player wins!' : (mode === 'cpu' ? 'CPU wins!' : 'Right player wins!');
+        document.getElementById('winMsg').textContent = winner;
+        document.getElementById('winMsg').style.display = 'block';
+        document.getElementById('restartBtn').style.display = 'inline-block';
+        document.getElementById('overlay').style.display = 'none';
+        return;
+    }
+
+    resetPositions();
+    running = false;
+    document.getElementById('overlay').textContent = 'Press Space to Continue';
+    document.getElementById('overlay').style.display = 'flex';
+}
+
+function update() {
+    if (!running) return;
+
+    // Left paddle (W/S always, plus Arrow Up/Down when playing vs CPU)
+    if (keys['w'] || (mode === 'cpu' && keys['arrowup'])) leftY -= 6;
+    if (keys['s'] || (mode === 'cpu' && keys['arrowdown'])) leftY += 6;
+    leftY = Math.max(0, Math.min(canvas.height - PADDLE_H, leftY));
+
+    if (mode === 'pvp') {
+        if (keys['arrowup']) rightY -= 6;
+        if (keys['arrowdown']) rightY += 6;
+        rightY = Math.max(0, Math.min(canvas.height - PADDLE_H, rightY));
+    } else {
+        // Simple CPU: track ball with slight imperfection
+        const target = ballY - PADDLE_H / 2;
+        const diff = target - rightY;
+        rightY += Math.sign(diff) * Math.min(Math.abs(diff), 4.5);
+        rightY = Math.max(0, Math.min(canvas.height - PADDLE_H, rightY));
+    }
+
+    ballX += ballVX;
+    ballY += ballVY;
+
+    if (ballY <= 0 || ballY >= canvas.height - BALL_SIZE) {
+        ballVY *= -1;
+    }
+
+    // Left paddle collision
+    if (ballX <= PADDLE_W && ballY + BALL_SIZE >= leftY && ballY <= leftY + PADDLE_H) {
+        ballVX = Math.abs(ballVX) * 1.03;
+        const hitPos = (ballY - leftY) / PADDLE_H - 0.5;
+        ballVY += hitPos * 3;
+    }
+
+    // Right paddle collision
+    if (ballX >= canvas.width - PADDLE_W - BALL_SIZE && ballY + BALL_SIZE >= rightY && ballY <= rightY + PADDLE_H) {
+        ballVX = -Math.abs(ballVX) * 1.03;
+        const hitPos = (ballY - rightY) / PADDLE_H - 0.5;
+        ballVY += hitPos * 3;
+    }
+
+    if (ballX < 0) {
+        endRound('right');
+    } else if (ballX > canvas.width) {
+        endRound('left');
+    }
+}
+
+function draw() {
+    ctx.fillStyle = '#121218';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // center dashed line
+    ctx.strokeStyle = '#383846';
+    ctx.setLineDash([8, 10]);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#4da6ff';
+    ctx.fillRect(0, leftY, PADDLE_W, PADDLE_H);
+    ctx.fillRect(canvas.width - PADDLE_W, rightY, PADDLE_W, PADDLE_H);
+
+    ctx.fillStyle = '#ffee00';
+    ctx.fillRect(ballX, ballY, BALL_SIZE, BALL_SIZE);
+}
+
+function loop() {
+    if (!gameOver) {
+        update();
+        draw();
+        animFrame = requestAnimationFrame(loop);
+    }
+}
+
+document.addEventListener('keydown', e => {
+    keys[e.key.toLowerCase()] = true;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+    }
+    if (e.key === ' ') {
+        e.preventDefault();
+        if (!gameOver) {
+            running = !running;
+            document.getElementById('overlay').style.display = running ? 'none' : 'flex';
+            if (running) document.getElementById('overlay').textContent = '';
+        }
+    }
+});
+
+document.addEventListener('keyup', e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+startGame();
+</script>
+
+</body>
+</html>

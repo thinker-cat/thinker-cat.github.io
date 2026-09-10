@@ -118,6 +118,30 @@
         color: #ffffff;
         pointer-events: none;
     }
+
+    .hz-toggle {
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #a0a0b0;
+        background: #2a2a35;
+        padding: 6px 14px;
+        border-radius: 20px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .hz-toggle input {
+        cursor: pointer;
+    }
+
+    .fps-counter {
+        font-size: 11px;
+        color: #666677;
+        margin-top: 4px;
+    }
 </style>
 </head>
 <body>
@@ -147,6 +171,12 @@
         Left paddle: W / S &nbsp;&nbsp;|&nbsp;&nbsp; Right paddle: computer &nbsp;&nbsp;|&nbsp;&nbsp; Space to start/pause
     </p>
 
+    <label class="hz-toggle">
+        <input type="checkbox" id="hzToggle" onchange="toggleHz()">
+        140Hz Mode (smoother on high refresh screens)
+    </label>
+    <p class="fps-counter" id="fpsCounter"></p>
+
 <script>
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
@@ -163,6 +193,14 @@ let keys = {};
 let running = false;
 let gameOver = false;
 let animFrame;
+let highRefreshMode = false;
+let lastTime = 0;
+let fpsSamples = [];
+let fpsLastUpdate = 0;
+
+function toggleHz() {
+    highRefreshMode = document.getElementById('hzToggle').checked;
+}
 
 function setMode(newMode) {
     mode = newMode;
@@ -191,6 +229,7 @@ function startGame() {
     scoreRight = 0;
     gameOver = false;
     running = false;
+    lastTime = 0;
     document.getElementById('scoreLeft').textContent = scoreLeft;
     document.getElementById('scoreRight').textContent = scoreRight;
     document.getElementById('winMsg').style.display = 'none';
@@ -225,28 +264,28 @@ function endRound(scorer) {
     document.getElementById('overlay').style.display = 'flex';
 }
 
-function update() {
+function update(dtScale) {
     if (!running) return;
 
     // Left paddle (W/S always, plus Arrow Up/Down when playing vs CPU)
-    if (keys['w'] || (mode === 'cpu' && keys['arrowup'])) leftY -= 6;
-    if (keys['s'] || (mode === 'cpu' && keys['arrowdown'])) leftY += 6;
+    if (keys['w'] || (mode === 'cpu' && keys['arrowup'])) leftY -= 6 * dtScale;
+    if (keys['s'] || (mode === 'cpu' && keys['arrowdown'])) leftY += 6 * dtScale;
     leftY = Math.max(0, Math.min(canvas.height - PADDLE_H, leftY));
 
     if (mode === 'pvp') {
-        if (keys['arrowup']) rightY -= 6;
-        if (keys['arrowdown']) rightY += 6;
+        if (keys['arrowup']) rightY -= 6 * dtScale;
+        if (keys['arrowdown']) rightY += 6 * dtScale;
         rightY = Math.max(0, Math.min(canvas.height - PADDLE_H, rightY));
     } else {
         // Simple CPU: track ball with slight imperfection
         const target = ballY - PADDLE_H / 2;
         const diff = target - rightY;
-        rightY += Math.sign(diff) * Math.min(Math.abs(diff), 4.5);
+        rightY += Math.sign(diff) * Math.min(Math.abs(diff), 4.5 * dtScale);
         rightY = Math.max(0, Math.min(canvas.height - PADDLE_H, rightY));
     }
 
-    ballX += ballVX;
-    ballY += ballVY;
+    ballX += ballVX * dtScale;
+    ballY += ballVY * dtScale;
 
     if (ballY <= 0 || ballY >= canvas.height - BALL_SIZE) {
         ballVY *= -1;
@@ -294,12 +333,29 @@ function draw() {
     ctx.fillRect(ballX, ballY, BALL_SIZE, BALL_SIZE);
 }
 
-function loop() {
-    if (!gameOver) {
-        update();
-        draw();
-        animFrame = requestAnimationFrame(loop);
+function loop(time = 0) {
+    if (gameOver) return;
+
+    if (!lastTime) lastTime = time;
+    let delta = time - lastTime;
+    lastTime = time;
+
+    if (!highRefreshMode) delta = 1000 / 60;
+    delta = Math.min(delta, 50);
+
+    const dtScale = delta / (1000 / 60);
+
+    fpsSamples.push(delta);
+    if (fpsSamples.length > 30) fpsSamples.shift();
+    if (time - fpsLastUpdate > 500) {
+        const avgDelta = fpsSamples.reduce((a, b) => a + b, 0) / fpsSamples.length;
+        document.getElementById('fpsCounter').textContent = Math.round(1000 / avgDelta) + ' fps';
+        fpsLastUpdate = time;
     }
+
+    update(dtScale);
+    draw();
+    animFrame = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {

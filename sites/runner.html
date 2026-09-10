@@ -93,6 +93,30 @@
         font-size: 12px;
         color: #a0a0b0;
     }
+
+    .hz-toggle {
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #a0a0b0;
+        background: #2a2a35;
+        padding: 6px 14px;
+        border-radius: 20px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .hz-toggle input {
+        cursor: pointer;
+    }
+
+    .fps-counter {
+        font-size: 11px;
+        color: #666677;
+        margin-top: 4px;
+    }
 </style>
 </head>
 <body>
@@ -120,6 +144,12 @@
         <div class="controls">
             Space / Up Arrow / Tap to jump
         </div>
+
+        <label class="hz-toggle">
+            <input type="checkbox" id="hzToggle" onchange="toggleHz()">
+            140Hz Mode (smoother on high refresh screens)
+        </label>
+        <p class="fps-counter" id="fpsCounter"></p>
     </div>
 
 <script>
@@ -129,7 +159,15 @@ const GROUND_Y = 210;
 const GRAVITY = 0.9;
 const JUMP_FORCE = -14;
 
-let cat, obstacles, score, best, speed, gameOver, spawnTimer, frame, animFrame, started;
+let cat, obstacles, score, best, speed, gameOver, spawnTimer, animFrame, started;
+let highRefreshMode = false;
+let lastTime = 0;
+let fpsSamples = [];
+let fpsLastUpdate = 0;
+
+function toggleHz() {
+    highRefreshMode = document.getElementById('hzToggle').checked;
+}
 
 function loadBest() {
     try {
@@ -153,10 +191,10 @@ function restartGame() {
     obstacles = [];
     score = 0;
     speed = 5;
-    frame = 0;
     spawnTimer = 60;
     gameOver = false;
     started = true;
+    lastTime = 0;
     document.getElementById('gameOverMsg').style.display = 'none';
     document.getElementById('restartBtn').style.display = 'none';
     updateStats();
@@ -239,29 +277,45 @@ function draw() {
     }
 }
 
-function loop() {
+function loop(time = 0) {
     if (gameOver) return;
 
+    if (!lastTime) lastTime = time;
+    let delta = time - lastTime;
+    lastTime = time;
+
+    if (!highRefreshMode) delta = 1000 / 60;
+    delta = Math.min(delta, 50);
+
+    const dtScale = delta / (1000 / 60);
+
+    fpsSamples.push(delta);
+    if (fpsSamples.length > 30) fpsSamples.shift();
+    if (time - fpsLastUpdate > 500) {
+        const avgDelta = fpsSamples.reduce((a, b) => a + b, 0) / fpsSamples.length;
+        document.getElementById('fpsCounter').textContent = Math.round(1000 / avgDelta) + ' fps';
+        fpsLastUpdate = time;
+    }
+
     if (started) {
-        frame++;
-        score += 0.15;
+        score += 0.15 * dtScale;
         speed = 5 + Math.min(score / 100, 8);
 
-        cat.vy += GRAVITY;
-        cat.y += cat.vy;
+        cat.vy += GRAVITY * dtScale;
+        cat.y += cat.vy * dtScale;
         if (cat.y > GROUND_Y - cat.h) {
             cat.y = GROUND_Y - cat.h;
             cat.vy = 0;
             cat.jumping = false;
         }
 
-        spawnTimer--;
+        spawnTimer -= dtScale;
         if (spawnTimer <= 0) {
             spawnObstacle();
             spawnTimer = 70 - Math.min(Math.floor(speed * 3), 40) + Math.random() * 20;
         }
 
-        obstacles.forEach(o => o.x -= speed);
+        obstacles.forEach(o => o.x -= speed * dtScale);
         obstacles = obstacles.filter(o => o.x + o.w > 0);
 
         for (const o of obstacles) {

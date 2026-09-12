@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>unblocked games idk</title>
+    <title>look how cool</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>">
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RWVD8FSGK1"></script>
@@ -24,6 +25,17 @@
             font-family: sans-serif;
             text-align: center;
             margin-top: 40px;
+            position: relative;
+        }
+
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
 
         .card {
@@ -34,7 +46,8 @@
             width: 650px !important; 
             max-width: 95% !important; 
             box-sizing: border-box;
-            position: relative; 
+            position: relative;
+            z-index: 1;
         }
 
         h1 {
@@ -213,11 +226,13 @@
 </head>
 <body class="theme-dark">
 
+    <canvas id="bgCanvas"></canvas>
+
     <button class="panic-btn" onclick="location.replace('https://www.google.com')" title="Emergency exit">🚨 Exit</button>
 
     <div class="card" style="width: 650px !important;">
         <h1>look at my website</h1>
-        <p class="subtitle">eeehhhh play the unblocked games if they are blocked i will create another site</p>
+        <p class="subtitle">now always online!!! thanks github :D</p>
         
         <!-- THEME AND VIDEO CONTROLS ROW -->
         <div class="controls-row">
@@ -238,9 +253,29 @@
                 <option value="2videoforsite.mp4">🎬 Video 2</option>
                 <option value="3videoforsite.mp4">🎬 Video 3</option>
             </select>
+
+            <!-- 3. Background Animation Dropdown -->
+            <select id="bgSelect" class="custom-select" onchange="changeBackground(this.value)">
+                <option value="none">✨ No Animation</option>
+                <option value="particles" selected>🫧 Floating Particles</option>
+                <option value="stars">✨ Starfield</option>
+                <option value="gradient">🌈 Shifting Gradient</option>
+                <option value="shapes">🔷 Floating Shapes</option>
+            </select>
         </div>
 
         <p><a class="my-link" href="https://youtube.com" target="_blank">Click :0</a></p>
+        
+        <!-- LOCAL VIDEO PLAYER SECTION -->
+        <video id="mainWebVideo" class="my-video" controls muted>
+            <source src="videoforwebsite.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- THE ORIGINAL AMONG US GIF -->
+        <img class="my-gif" src="animation.gif" alt="should play a gif">
+
+        <!-- GAME/TOOL LINKS -->
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/tetris.html" target="_blank">🎮 Play Tetris</a></p>
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/cookieclicker.html" target="_blank">🍪 Play Cookie Clicker</a></p>
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/snake.html" target="_blank">🐍 Play Snake</a></p>
@@ -251,15 +286,6 @@
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/thisorthat.html" target="_blank">🤔 This or That</a></p>
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/pong.html" target="_blank">🏓 Play Pong</a></p>
         <p><a class="my-link" href="https://thinker-cat.github.io/sites/flappy.html" target="_blank">🐦 Play Flappy</a></p>
-        
-        <!-- LOCAL VIDEO PLAYER SECTION -->
-        <video id="mainWebVideo" class="my-video" controls muted>
-            <source src="videoforwebsite.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-
-        <!-- THE ORIGINAL AMONG US GIF -->
-        <img class="my-gif" src="animation.gif" alt="should play a gif">
 
         <!-- PINNED TO THE VERY BOTTOM RIGHT -->
         <a class="bottom-right-container" href="https://thinker-cat.github.io/sites/" style="text-decoration: none;">
@@ -288,6 +314,156 @@
                 location.replace('https://www.google.com');
             }
         });
+
+        // ================================
+        // BACKGROUND ANIMATION SYSTEM
+        // ================================
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let bgMode = 'particles';
+        let bgAnimFrame;
+        let particles = [];
+        let stars = [];
+        let shapes = [];
+        let gradientHue = 0;
+
+        function resizeCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function initParticles() {
+            particles = Array.from({ length: 40 }, () => ({
+                x: Math.random() * bgCanvas.width,
+                y: Math.random() * bgCanvas.height,
+                r: 2 + Math.random() * 4,
+                speed: 0.3 + Math.random() * 0.8,
+                drift: (Math.random() - 0.5) * 0.5,
+                opacity: 0.2 + Math.random() * 0.4
+            }));
+        }
+
+        function initStars() {
+            stars = Array.from({ length: 100 }, () => ({
+                x: Math.random() * bgCanvas.width,
+                y: Math.random() * bgCanvas.height,
+                r: Math.random() * 1.5,
+                twinkleSpeed: 0.02 + Math.random() * 0.04,
+                twinklePhase: Math.random() * Math.PI * 2
+            }));
+        }
+
+        function initShapes() {
+            const shapeTypes = ['circle', 'square', 'triangle'];
+            shapes = Array.from({ length: 12 }, () => ({
+                x: Math.random() * bgCanvas.width,
+                y: Math.random() * bgCanvas.height,
+                size: 15 + Math.random() * 25,
+                speed: 0.2 + Math.random() * 0.4,
+                rotation: Math.random() * Math.PI * 2,
+                rotSpeed: (Math.random() - 0.5) * 0.02,
+                type: shapeTypes[Math.floor(Math.random() * shapeTypes.length)],
+                opacity: 0.1 + Math.random() * 0.15
+            }));
+        }
+
+        function drawParticles() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            particles.forEach(p => {
+                p.y -= p.speed;
+                p.x += p.drift;
+                if (p.y < -10) { p.y = bgCanvas.height + 10; p.x = Math.random() * bgCanvas.width; }
+                if (p.x < -10) p.x = bgCanvas.width + 10;
+                if (p.x > bgCanvas.width + 10) p.x = -10;
+
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(77, 166, 255, ${p.opacity})`;
+                bgCtx.fill();
+            });
+        }
+
+        function drawStars() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            stars.forEach(s => {
+                s.twinklePhase += s.twinkleSpeed;
+                const opacity = 0.3 + Math.abs(Math.sin(s.twinklePhase)) * 0.7;
+                bgCtx.beginPath();
+                bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+                bgCtx.fill();
+            });
+        }
+
+        function drawGradient() {
+            gradientHue = (gradientHue + 0.15) % 360;
+            const grad = bgCtx.createLinearGradient(0, 0, bgCanvas.width, bgCanvas.height);
+            grad.addColorStop(0, `hsla(${gradientHue}, 60%, 15%, 0.5)`);
+            grad.addColorStop(1, `hsla(${(gradientHue + 80) % 360}, 60%, 12%, 0.5)`);
+            bgCtx.fillStyle = grad;
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+        }
+
+        function drawShapeAt(s) {
+            bgCtx.save();
+            bgCtx.translate(s.x, s.y);
+            bgCtx.rotate(s.rotation);
+            bgCtx.fillStyle = `rgba(161, 36, 255, ${s.opacity})`;
+
+            if (s.type === 'circle') {
+                bgCtx.beginPath();
+                bgCtx.arc(0, 0, s.size / 2, 0, Math.PI * 2);
+                bgCtx.fill();
+            } else if (s.type === 'square') {
+                bgCtx.fillRect(-s.size / 2, -s.size / 2, s.size, s.size);
+            } else {
+                bgCtx.beginPath();
+                bgCtx.moveTo(0, -s.size / 2);
+                bgCtx.lineTo(s.size / 2, s.size / 2);
+                bgCtx.lineTo(-s.size / 2, s.size / 2);
+                bgCtx.closePath();
+                bgCtx.fill();
+            }
+            bgCtx.restore();
+        }
+
+        function drawShapes() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            shapes.forEach(s => {
+                s.y -= s.speed;
+                s.rotation += s.rotSpeed;
+                if (s.y < -50) { s.y = bgCanvas.height + 50; s.x = Math.random() * bgCanvas.width; }
+                drawShapeAt(s);
+            });
+        }
+
+        function bgLoop() {
+            if (bgMode === 'particles') drawParticles();
+            else if (bgMode === 'stars') drawStars();
+            else if (bgMode === 'gradient') drawGradient();
+            else if (bgMode === 'shapes') drawShapes();
+            bgAnimFrame = requestAnimationFrame(bgLoop);
+        }
+
+        function changeBackground(mode) {
+            bgMode = mode;
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            if (mode === 'none') {
+                if (bgAnimFrame) cancelAnimationFrame(bgAnimFrame);
+                return;
+            }
+            if (mode === 'particles') initParticles();
+            if (mode === 'stars') initStars();
+            if (mode === 'shapes') initShapes();
+            if (bgAnimFrame) cancelAnimationFrame(bgAnimFrame);
+            bgAnimFrame = requestAnimationFrame(bgLoop);
+        }
+
+        // Start with particles by default
+        initParticles();
+        bgLoop();
     </script>
 
 </body>

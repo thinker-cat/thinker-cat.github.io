@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>platformer - thinker cat</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RWVD8FSGK1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RWVD8FSGK1');
+</script>
+
+<style>
+    body {
+        background: #1e1e24;
+        font-family: sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #a0a0b0;
+        font-size: 13px;
+        margin-top: 0;
+    }
+
+    .game-wrap {
+        display: inline-block;
+        position: relative;
+        margin-top: 10px;
+    }
+
+    canvas {
+        background: linear-gradient(#3a5a9a 0%, #6b8fc9 100%);
+        border: 3px solid #4da6ff;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(77, 166, 255, 0.3);
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 12px;
+        font-size: 15px;
+        font-weight: bold;
+        flex-wrap: wrap;
+    }
+
+    .stat-label {
+        color: #a0a0b0;
+        font-weight: normal;
+        font-size: 12px;
+        display: block;
+    }
+
+    .stat-value {
+        color: #ffee00;
+    }
+
+    .controls {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #a0a0b0;
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.5);
+        color: #ffffff;
+        text-align: center;
+        display: none;
+    }
+
+    .overlay .big {
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .overlay button {
+        margin-top: 14px;
+        padding: 10px 22px;
+        background: #4da6ff;
+        color: #1e1e24;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .hz-toggle {
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #a0a0b0;
+        background: #2a2a35;
+        padding: 6px 14px;
+        border-radius: 20px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .hz-toggle input {
+        cursor: pointer;
+    }
+
+    .fps-counter {
+        font-size: 11px;
+        color: #666677;
+        margin-top: 4px;
+    }
+</style>
+</head>
+<body>
+
+    <h1>🐱 PLATFORMER</h1>
+    <p class="subtitle">made by thinker cat — infinite mode</p>
+
+    <div class="game-wrap">
+        <canvas id="board" width="700" height="400"></canvas>
+        <div class="overlay" id="overlay">
+            <div class="big" id="overlayText"></div>
+            <button onclick="handleOverlayClick()" id="overlayBtn">Continue</button>
+        </div>
+    </div>
+
+    <div class="stat-row">
+        <div>
+            <span class="stat-label">DISTANCE</span>
+            <span class="stat-value" id="distance">0</span>
+        </div>
+        <div>
+            <span class="stat-label">BEST</span>
+            <span class="stat-value" id="bestDistance">0</span>
+        </div>
+        <div>
+            <span class="stat-label">COINS</span>
+            <span class="stat-value" id="coinCount">0</span>
+        </div>
+        <div>
+            <span class="stat-label">DEATHS</span>
+            <span class="stat-value" id="deathCount">0</span>
+        </div>
+    </div>
+
+    <p class="controls">Arrow Keys / A D to move &nbsp;|&nbsp; Space / Up / W to jump &mdash; runs forever, platforms are always reachable</p>
+
+    <label class="hz-toggle">
+        <input type="checkbox" id="hzToggle" onchange="toggleHz()">
+        140Hz Mode (smoother on high refresh screens)
+    </label>
+    <p class="fps-counter" id="fpsCounter"></p>
+
+<script>
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+const GRAVITY = 0.6;
+const MOVE_SPEED = 4;
+const JUMP_FORCE = -12;
+const PLAYER_W = 26;
+const PLAYER_H = 30;
+
+// Physics-derived reachability limits (in nominal 60fps units).
+// A dtScale of 1 always represents "one nominal frame" of motion, so these
+// stay valid whether we're in capped mode or true high-refresh mode.
+const JUMP_AIR_TIME = (-JUMP_FORCE / GRAVITY) * 2;       // frames to go up and come back to same height
+const MAX_JUMP_HEIGHT = (JUMP_FORCE * JUMP_FORCE) / (2 * GRAVITY);
+const MAX_HORIZONTAL_REACH = MOVE_SPEED * JUMP_AIR_TIME;
+
+let player, platforms, coins, distanceScore, bestDistance, coinsCollected, deaths, keys, gameState, animFrame;
+let camera = 0;
+let highRefreshMode = false;
+let lastTime = 0;
+let fpsSamples = [];
+let fpsLastUpdate = 0;
+let lastPlatform;
+
+function toggleHz() {
+    highRefreshMode = document.getElementById('hzToggle').checked;
+}
+
+function loadBest() {
+    try {
+        const saved = localStorage.getItem('thinkerCatPlatformerBest');
+        return saved ? parseInt(saved, 10) : 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+function saveBest(val) {
+    try {
+        localStorage.setItem('thinkerCatPlatformerBest', val.toString());
+    } catch (e) {
+        // storage unavailable, game still works
+    }
+}
+
+function makePlayer(x, y) {
+    return { x, y, w: PLAYER_W, h: PLAYER_H, vx: 0, vy: 0, onGround: false, facing: 1 };
+}
+
+// Generates the next platform, guaranteed to be within jump range of the previous one.
+function generateNextPlatform() {
+    const prev = lastPlatform;
+    const minGap = 60;
+    const maxGap = Math.max(minGap + 20, MAX_HORIZONTAL_REACH * 0.75);
+    const gap = minGap + Math.random() * (maxGap - minGap);
+
+    const maxUp = MAX_JUMP_HEIGHT * 0.6;   // how much higher the next platform can be
+    const maxDown = 110;                    // how much lower it's allowed to drop
+    const deltaY = (Math.random() * (maxUp + maxDown)) - maxDown;
+
+    let newY = prev.y + deltaY;
+    newY = Math.max(80, Math.min(canvas.height - 40, newY));
+
+    const width = 70 + Math.random() * 90;
+    const platform = { x: prev.x + prev.w + gap, y: newY, w: width, h: 20 };
+    platforms.push(platform);
+    lastPlatform = platform;
+
+    // Sometimes place a coin above the new platform
+    if (Math.random() < 0.6) {
+        coins.push({
+            x: platform.x + platform.w / 2,
+            y: platform.y - 30,
+            collected: false
+        });
+    }
+}
+
+function ensurePlatformsAhead() {
+    while (lastPlatform.x < player.x + canvas.width * 2.5) {
+        generateNextPlatform();
+    }
+    // Clean up platforms/coins far behind the player to keep arrays small
+    platforms = platforms.filter(p => p.x + p.w > player.x - canvas.width * 2);
+    coins = coins.filter(c => c.x > player.x - canvas.width * 2);
+}
+
+function initGame() {
+    const startPlatform = { x: 0, y: 340, w: 200, h: 30 };
+    platforms = [startPlatform];
+    lastPlatform = startPlatform;
+    coins = [];
+    player = makePlayer(30, 300);
+    camera = 0;
+    distanceScore = 0;
+    coinsCollected = 0;
+    deaths = 0;
+    bestDistance = loadBest();
+    gameState = 'playing';
+    lastTime = 0;
+    hideOverlay();
+    ensurePlatformsAhead();
+    updateStats();
+    if (animFrame) cancelAnimationFrame(animFrame);
+    animFrame = requestAnimationFrame(loop);
+}
+
+function updateStats() {
+    document.getElementById('distance').textContent = Math.floor(distanceScore);
+    document.getElementById('bestDistance').textContent = bestDistance;
+    document.getElementById('coinCount').textContent = coinsCollected;
+    document.getElementById('deathCount').textContent = deaths;
+}
+
+function showOverlay(text, btnText, onClick) {
+    document.getElementById('overlay').style.display = 'flex';
+    document.getElementById('overlayText').textContent = text;
+    document.getElementById('overlayBtn').textContent = btnText;
+    window.overlayAction = onClick;
+}
+
+function hideOverlay() {
+    document.getElementById('overlay').style.display = 'none';
+}
+
+function handleOverlayClick() {
+    if (window.overlayAction) window.overlayAction();
+}
+
+function respawn() {
+    deaths++;
+    // Find the platform closest behind the player's furthest progress to respawn safely
+    const safe = platforms
+        .filter(p => p.x < player.x)
+        .sort((a, b) => b.x - a.x)[0] || platforms[0];
+    player = makePlayer(safe.x + 10, safe.y - PLAYER_H - 5);
+    updateStats();
+}
+
+function rectsOverlap(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function update(dtScale) {
+    if (gameState !== 'playing') return;
+
+    if (keys['arrowleft'] || keys['a']) { player.vx = -MOVE_SPEED; player.facing = -1; }
+    else if (keys['arrowright'] || keys['d']) { player.vx = MOVE_SPEED; player.facing = 1; }
+    else { player.vx = 0; }
+
+    if ((keys[' '] || keys['arrowup'] || keys['w']) && player.onGround) {
+        player.vy = JUMP_FORCE;
+        player.onGround = false;
+    }
+
+    player.vy += GRAVITY * dtScale;
+
+    const prevX = player.x;
+    const prevY = player.y;
+
+    // Move horizontally first, resolve horizontal collisions using where we came from
+    player.x += player.vx * dtScale;
+    platforms.forEach(p => {
+        const verticalOverlap = prevY + player.h > p.y && prevY < p.y + p.h;
+        if (!verticalOverlap) return;
+        const newBox = { x: player.x, y: prevY, w: player.w, h: player.h };
+        if (rectsOverlap(newBox, p)) {
+            if (player.vx > 0) player.x = p.x - player.w;
+            else if (player.vx < 0) player.x = p.x + p.w;
+        }
+    });
+
+    // Move vertically, resolve using a swept check so fast falls can't skip through thin platforms
+    player.y += player.vy * dtScale;
+    player.onGround = false;
+    platforms.forEach(p => {
+        const horizontalOverlap = player.x + player.w > p.x && player.x < p.x + p.w;
+        if (!horizontalOverlap) return;
+
+        const prevBottom = prevY + player.h;
+        const newBottom = player.y + player.h;
+
+        // Landing on top: was above the platform, now at or past its surface
+        if (player.vy >= 0 && prevBottom <= p.y + 0.5 && newBottom >= p.y) {
+            player.y = p.y - player.h;
+            player.vy = 0;
+            player.onGround = true;
+            return;
+        }
+
+        // Hitting from below: was below the platform's underside, now at or past it
+        const prevTop = prevY;
+        const newTop = player.y;
+        if (player.vy < 0 && prevTop >= p.y + p.h - 0.5 && newTop <= p.y + p.h) {
+            player.y = p.y + p.h;
+            player.vy = 0;
+        }
+    });
+
+    if (player.x < camera) player.x = camera;
+
+    distanceScore = Math.max(distanceScore, player.x / 10);
+    if (distanceScore > bestDistance) {
+        bestDistance = Math.floor(distanceScore);
+        saveBest(bestDistance);
+    }
+
+    if (player.y > canvas.height + 80) {
+        respawn();
+        return;
+    }
+
+    coins.forEach(c => {
+        if (!c.collected) {
+            const dist = Math.hypot((player.x + player.w / 2) - c.x, (player.y + player.h / 2) - c.y);
+            if (dist < 22) {
+                c.collected = true;
+                coinsCollected++;
+            }
+        }
+    });
+
+    ensurePlatformsAhead();
+    updateStats();
+
+    // camera follows player, keeping them roughly a third of the way across the screen
+    const targetCamera = player.x - canvas.width / 3;
+    const lerpFactor = Math.min(1, 0.12 * dtScale);
+    camera += (targetCamera - camera) * lerpFactor;
+    if (camera < 0) camera = 0;
+}
+
+function drawPlatform(p) {
+    const screenX = p.x - camera;
+    if (screenX + p.w < 0 || screenX > canvas.width) return;
+    ctx.fillStyle = '#6b4226';
+    ctx.fillRect(screenX, p.y, p.w, p.h);
+    ctx.fillStyle = '#4caf50';
+    ctx.fillRect(screenX, p.y, p.w, 6);
+}
+
+function drawCoin(c) {
+    if (c.collected) return;
+    const screenX = c.x - camera;
+    if (screenX < -20 || screenX > canvas.width + 20) return;
+    ctx.fillStyle = '#ffee00';
+    ctx.beginPath();
+    ctx.arc(screenX, c.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#cc9900';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function drawPlayer() {
+    const screenX = player.x - camera + player.w / 2;
+    ctx.save();
+    ctx.translate(screenX, player.y + player.h / 2);
+    ctx.scale(player.facing, 1);
+
+    ctx.fillStyle = '#ffcc00';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, player.w / 2, player.h / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-8, -player.h / 2 + 2);
+    ctx.lineTo(-4, -player.h / 2 - 8);
+    ctx.lineTo(0, -player.h / 2 + 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(2, -player.h / 2 + 2);
+    ctx.lineTo(6, -player.h / 2 - 8);
+    ctx.lineTo(10, -player.h / 2 + 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#1e1e24';
+    ctx.beginPath();
+    ctx.arc(6, -3, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    platforms.forEach(drawPlatform);
+    coins.forEach(drawCoin);
+    drawPlayer();
+}
+
+function loop(time = 0) {
+    if (!lastTime) lastTime = time;
+    let delta = time - lastTime;
+    lastTime = time;
+
+    if (!highRefreshMode) delta = 1000 / 60;
+    delta = Math.min(delta, 32); // tighter cap avoids skipping through thin platforms on lag spikes
+
+    const dtScale = delta / (1000 / 60);
+
+    fpsSamples.push(delta);
+    if (fpsSamples.length > 30) fpsSamples.shift();
+    if (time - fpsLastUpdate > 500) {
+        const avgDelta = fpsSamples.reduce((a, b) => a + b, 0) / fpsSamples.length;
+        document.getElementById('fpsCounter').textContent = Math.round(1000 / avgDelta) + ' fps';
+        fpsLastUpdate = time;
+    }
+
+    update(dtScale);
+    draw();
+    animFrame = requestAnimationFrame(loop);
+}
+
+keys = {};
+document.addEventListener('keydown', e => {
+    keys[e.key.toLowerCase()] = true;
+    if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+    }
+});
+document.addEventListener('keyup', e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+initGame();
+</script>
+
+</body>
+</html>

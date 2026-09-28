@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>whack-a-mole - thinker cat</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RWVD8FSGK1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RWVD8FSGK1');
+</script>
+
+<style>
+    body {
+        background: #1e1e24;
+        font-family: sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin: 0;
+        padding: 30px 15px;
+        user-select: none;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #a0a0b0;
+        font-size: 13px;
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 18px;
+    }
+
+    .stat-box {
+        background: #2a2a35;
+        border-radius: 8px;
+        padding: 8px 20px;
+        min-width: 80px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: #a0a0b0;
+        display: block;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #ffee00;
+    }
+
+    #grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        width: 330px;
+        margin: 0 auto;
+    }
+
+    .hole {
+        width: 100px;
+        height: 100px;
+        background: #2a2a35;
+        border: 3px solid #4a3220;
+        border-radius: 50%;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: inset 0 8px 14px rgba(0,0,0,0.6);
+    }
+
+    .critter {
+        position: absolute;
+        left: 0;
+        bottom: -100%;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 52px;
+        transition: bottom 0.12s ease;
+        pointer-events: none;
+    }
+
+    .hole.up .critter {
+        bottom: 0;
+    }
+
+    .hole.whacked .critter {
+        bottom: -100%;
+    }
+
+    .hole.hit {
+        animation: flash 0.2s ease;
+    }
+
+    @keyframes flash {
+        0% { background: #39ff14; }
+        100% { background: #2a2a35; }
+    }
+
+    #startBtn {
+        margin-top: 24px;
+        padding: 12px 28px;
+        background: #4da6ff;
+        color: #1e1e24;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .message {
+        margin-top: 16px;
+        font-size: 18px;
+        font-weight: bold;
+        min-height: 24px;
+        color: #39ff14;
+    }
+
+    .controls {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #a0a0b0;
+    }
+</style>
+</head>
+<body>
+
+    <h1>🔨 WHACK-A-MOLE</h1>
+    <p class="subtitle">made by thinker cat</p>
+
+    <div class="stat-row">
+        <div class="stat-box">
+            <span class="stat-label">SCORE</span>
+            <span class="stat-value" id="score">0</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">TIME</span>
+            <span class="stat-value" id="time">30</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">BEST</span>
+            <span class="stat-value" id="best">0</span>
+        </div>
+    </div>
+
+    <div id="grid"></div>
+
+    <p class="message" id="message"></p>
+    <button id="startBtn" onclick="startGame()">Start Game</button>
+    <p class="controls">Click or tap the critters as they pop up — they get faster over time!</p>
+
+<script>
+const GAME_LENGTH = 30; // seconds
+const HOLE_COUNT = 9;
+const CRITTERS = ['🐹', '🐭', '🐱'];
+
+let holes = [];
+let holeState = []; // { up: bool, timeout: id }
+let score, timeLeft, best, running;
+let spawnTimer, countdownTimer, elapsed;
+
+function loadBest() {
+    try {
+        const saved = localStorage.getItem('thinkerCatWhackBest');
+        return saved ? parseInt(saved, 10) : 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+function saveBest(val) {
+    try {
+        localStorage.setItem('thinkerCatWhackBest', val.toString());
+    } catch (e) {
+        // storage unavailable, game still works
+    }
+}
+
+function buildGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    holes = [];
+    holeState = [];
+    for (let i = 0; i < HOLE_COUNT; i++) {
+        const hole = document.createElement('div');
+        hole.className = 'hole';
+        hole.innerHTML = '<div class="critter"></div>';
+        hole.addEventListener('mousedown', () => whack(i));
+        hole.addEventListener('touchstart', e => {
+            e.preventDefault();
+            whack(i);
+        });
+        grid.appendChild(hole);
+        holes.push(hole);
+        holeState.push({ up: false, timeout: null });
+    }
+}
+
+function updateStats() {
+    document.getElementById('score').textContent = score;
+    document.getElementById('time').textContent = timeLeft;
+    document.getElementById('best').textContent = best;
+}
+
+// Difficulty scales with how long you've been playing (0 to 1)
+function difficulty() {
+    return Math.min(1, elapsed / GAME_LENGTH);
+}
+
+function critterLifetime() {
+    // starts around 1100ms, shrinks toward 450ms
+    return 1100 - difficulty() * 650;
+}
+
+function spawnInterval() {
+    // starts around 900ms between spawns, shrinks toward 350ms
+    return 900 - difficulty() * 550;
+}
+
+function moleAtOnceLimit() {
+    return difficulty() < 0.5 ? 1 : (difficulty() < 0.8 ? 2 : 3);
+}
+
+function popUp(index) {
+    const state = holeState[index];
+    if (state.up) return;
+
+    state.up = true;
+    const hole = holes[index];
+    hole.querySelector('.critter').textContent = CRITTERS[Math.floor(Math.random() * CRITTERS.length)];
+    hole.classList.remove('whacked');
+    hole.classList.add('up');
+
+    state.timeout = setTimeout(() => {
+        hideCritter(index);
+    }, critterLifetime());
+}
+
+function hideCritter(index) {
+    const state = holeState[index];
+    state.up = false;
+    clearTimeout(state.timeout);
+    holes[index].classList.remove('up');
+}
+
+function whack(index) {
+    if (!running) return;
+    const state = holeState[index];
+    if (!state.up) return;
+
+    score++;
+    holes[index].classList.add('hit');
+    setTimeout(() => holes[index].classList.remove('hit'), 200);
+
+    state.up = false;
+    clearTimeout(state.timeout);
+    holes[index].classList.remove('up');
+    holes[index].classList.add('whacked');
+    updateStats();
+}
+
+function currentlyUpCount() {
+    return holeState.filter(s => s.up).length;
+}
+
+function spawnLoop() {
+    if (!running) return;
+
+    if (currentlyUpCount() < moleAtOnceLimit()) {
+        const available = holeState
+            .map((s, i) => (!s.up ? i : null))
+            .filter(i => i !== null);
+        if (available.length > 0) {
+            popUp(available[Math.floor(Math.random() * available.length)]);
+        }
+    }
+
+    spawnTimer = setTimeout(spawnLoop, spawnInterval());
+}
+
+function startGame() {
+    score = 0;
+    timeLeft = GAME_LENGTH;
+    elapsed = 0;
+    running = true;
+    best = loadBest();
+
+    buildGrid();
+    updateStats();
+    document.getElementById('message').textContent = '';
+    document.getElementById('startBtn').style.display = 'none';
+
+    clearTimeout(spawnTimer);
+    clearInterval(countdownTimer);
+
+    countdownTimer = setInterval(() => {
+        timeLeft--;
+        elapsed++;
+        updateStats();
+        if (timeLeft <= 0) endGame();
+    }, 1000);
+
+    spawnLoop();
+}
+
+function endGame() {
+    running = false;
+    clearTimeout(spawnTimer);
+    clearInterval(countdownTimer);
+    holeState.forEach((s, i) => hideCritter(i));
+
+    let msg = 'Time\'s up! You whacked ' + score + '!';
+    if (score > best) {
+        best = score;
+        saveBest(best);
+        msg += ' 🎉 New best!';
+    }
+    document.getElementById('message').textContent = msg;
+    document.getElementById('startBtn').textContent = 'Play Again';
+    document.getElementById('startBtn').style.display = 'inline-block';
+    updateStats();
+}
+
+best = loadBest();
+score = 0;
+timeLeft = GAME_LENGTH;
+running = false;
+buildGrid();
+updateStats();
+</script>
+
+</body>
+</html>
